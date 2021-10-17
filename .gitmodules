@@ -1,0 +1,6 @@
+[submodule "react-native"]
+	path = react-native
+	url = https://github.com/ryjen/jokeapp-rn.git
+[submodule "android"]
+	path = android
+	url = https://github.com/ryjen/jokeapp-droid.git
