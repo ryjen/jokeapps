@@ -61,6 +61,15 @@ The Android project declares Gradle 7.4, AGP 7.3.1, Kotlin 1.6.10 and SDK 31. Re
 
 **Not covered:** production-signed release or key custody, Play distribution, iOS Xcode build, RN native app packaging, and repeatability across multiple emulator environments. The earlier debug/unsigned-release APK build was qualified on older source and is separate evidence.
 
+## Verified Android data-correctness regression qualification — October 12, 2026 (Pacific)
+
+[Hosted Actions run #38315903870](https://github.com/ryjen/jokeapps/actions/runs/38315903870) completed **success** on source commit `f88fb62eb748f9550d1960a0e8ef789d00b73237`, branch `fix/android-joke-key-and-cache-fallback-20261012`. Its extra one-shot workflow was scoped to that branch and workflow path, with read-only permissions and a 40-minute job limit. This workflow is **removed** before merging; all Android application and regression-test source is unchanged by that cleanup.
+
+- **API 31 emulator instrumentation:** `:app:connectedDebugAndroidTest` **PASS**, JUnit XML **24 tests, 0 failures, 0 errors, 0 skipped**, Gradle `BUILD SUCCESSFUL in 3m 53s`. New regressions cover numeric external-key/internal-row-ID collisions; normal cache miss, cached hit, random remote null fallback, and cancellation.
+- **Android Gradle unit tests, lint and packaging:** `test lint :app:assembleDebug :app:assembleRelease` **PASS**, `BUILD SUCCESSFUL in 1m 54s`, under Java 17 and Android SDK 31. Debug and unsigned release variants assembled; this is **not** a production-signed release.
+- **Scope:** Removes the `OR id=:key` condition from SQLDelight external-key queries; correctly handles normal cache-miss and null-remote fallback; propagates cancellation in `JokeRepository` and `JokeService`.
+- **Not covered:** Existing-data duplicate-key cleanup, unique-index database migrations, concurrent atomic favorite upserts ([#11](https://github.com/ryjen/jokeapps/issues/11)), production signing, or iOS builds. The success is a single verified emulator environment, not repeated-run consistency.
+
 ## Acceptance
 
 Capture tool versions, commands, runner identity, commit SHA and exit statuses. All three original source repositories were verified private and archived on October 12, 2026. Keep them as read-only historical references; deletion is a separate decision requiring independent private backups, repository metadata/link impact review, and explicit authorization.

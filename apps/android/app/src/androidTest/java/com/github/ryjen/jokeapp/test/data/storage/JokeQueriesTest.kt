@@ -57,4 +57,24 @@ class JokeDaoTest : KoinTest {
         assertThat(joke).isNull()
     }
 
+    @Test
+    fun externalKeyNeverSelectsOrMutatesAnUnrelatedLocalRowId() = runTest {
+        val ownerKey = "collision-owner-" + System.nanoTime()
+        db.jokeQueries.insert(ownerKey, "unrelated row", null, false)
+        val owner = db.jokeQueries.get(ownerKey).executeAsOne()
+        val conflictingExternalKey = owner.id.toString()
+        db.jokeQueries.insert(conflictingExternalKey, "desired row", null, false)
+
+        // The external key is numeric, but it must not match the owner's local row ID.
+        assertThat(db.jokeQueries.get(conflictingExternalKey).executeAsOne().key)
+            .isEqualTo(conflictingExternalKey)
+        db.jokeQueries.updateFavorite(true, conflictingExternalKey)
+        assertThat(db.jokeQueries.get(ownerKey).executeAsOne().isFavorite).isFalse()
+        assertThat(db.jokeQueries.get(conflictingExternalKey).executeAsOne().isFavorite).isTrue()
+
+        db.jokeQueries.delete(conflictingExternalKey)
+        assertThat(db.jokeQueries.get(conflictingExternalKey).executeAsOneOrNull()).isNull()
+        assertThat(db.jokeQueries.get(ownerKey).executeAsOne().key).isEqualTo(ownerKey)
+    }
+
 }
