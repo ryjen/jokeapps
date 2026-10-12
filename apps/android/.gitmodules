@@ -1,3 +1,0 @@
-[submodule "security"]
-	path = security
-	url = https://github.com/ryjen/jokeapp-security.git
