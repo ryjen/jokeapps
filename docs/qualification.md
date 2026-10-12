@@ -70,6 +70,17 @@ The Android project declares Gradle 7.4, AGP 7.3.1, Kotlin 1.6.10 and SDK 31. Re
 - **Scope:** Removes the `OR id=:key` condition from SQLDelight external-key queries; correctly handles normal cache-miss and null-remote fallback; propagates cancellation in `JokeRepository` and `JokeService`.
 - **Not covered:** Existing-data duplicate-key cleanup, unique-index database migrations, concurrent atomic favorite upserts ([#11](https://github.com/ryjen/jokeapps/issues/11)), production signing, or iOS builds. The success is a single verified emulator environment, not repeated-run consistency.
 
+## Verified Android database migration and atomic favorites — October 12, 2026 (Pacific)
+
+[Hosted Actions run #38317013331](https://github.com/ryjen/jokeapps/actions/runs/38317013331) completed **success** on source commit `9b1b2cc559bcd3663f0f5fa16d0c305ad7aa3161`. The only extra file at this verification commit was the branch/path-scoped one-shot workflow, which is **removed** from the merge candidate; the Android application and test sources do not change in cleanup.
+
+- **Offline SQLite 1→2 migration preflight:** PASS; duplicates collapsed, newest row's content/date retained, any historical favorite state preserved, and the new unique external-key index rejects duplicates.
+- **Android API 31 device migration and concurrency instrumentation:** `:app:connectedDebugAndroidTest` PASS, **26 tests, 0 failures, 0 errors, 0 skipped**, Gradle `BUILD SUCCESSFUL in 2m 56s`. The tests construct a real version-1 database and reopen through the upgraded SQLDelight schema, validate the unique index and consolidated favorites, and exercise 12 concurrent favorite writes and idempotent cache refresh.
+- **Gradle unit tests, lint and APK builds:** `test lint :app:assembleDebug :app:assembleRelease` PASS, `BUILD SUCCESSFUL in 1m 26s`, Java 17 / Android SDK 31. The release APK is **unsigned**.
+- **Migration semantics:** within a duplicate external-key group, retain the **highest integer row ID**, its content and created timestamp, with `isFavorite=true` if any duplicate was favorited. All other duplicate rows are removed before making `joke.key` unique. This is an intentional database data consolidation and must be accepted when updating existing installations. The test verifies one old-db fixture; it is not proof of every legacy dataset or rollback safety.
+- **Atomic writes:** favorite creation inserts or ignores by the unique external key, then updates the favorite bit in one database transaction. Repeated stale cache inserts cannot reset an existing favorite.
+- **Not covered:** signed releases, production rollout/rollback procedures, alternative Android database versions, iOS native builds, or repeated independent emulator runs. No permanent automatic hosted CI was enabled.
+
 ## Acceptance
 
 Capture tool versions, commands, runner identity, commit SHA and exit statuses. All three original source repositories were verified private and archived on October 12, 2026. Keep them as read-only historical references; deletion is a separate decision requiring independent private backups, repository metadata/link impact review, and explicit authorization.

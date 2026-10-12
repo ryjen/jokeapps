@@ -19,13 +19,26 @@ class LocalDataSource(
     fun updateFavorite(key: String, value: Boolean = true) =
         db.jokeQueries.updateFavorite(value, key)
 
+    // Idempotent cache insertion: never replace an existing favorite with a stale remote response.
     fun insertJoke(joke: Joke) =
-        db.jokeQueries.insert(
+        db.jokeQueries.insertOrIgnore(
             joke.key,
             joke.content,
             joke.created,
             joke.isFavorite
         )
+
+    // The two operations are one database transaction, with a UNIQUE(key) constraint
+    // as the cross-connection guard against concurrent duplicate inserts.
+    fun addFavorite(joke: Joke) = db.transaction {
+        db.jokeQueries.insertOrIgnore(
+            joke.key,
+            joke.content,
+            joke.created,
+            true
+        )
+        db.jokeQueries.updateFavorite(true, joke.key)
+    }
 
     fun getRandomJoke() = db.jokeQueries.random().executeAsOneOrNull()
 }

@@ -45,13 +45,9 @@ class JokeRepository(
         return cached?.let { map(it) } ?: remoteDataSource.getJoke(id)?.let { map(it) }
     }
 
-    // UPDATE does not fail when no row matches. Check presence before deciding to insert.
+    // Atomic insert-or-favorite, safe for repeated writes of the same external key.
     override suspend fun addFavorite(joke: DomainJoke) {
-        if (localDataSource.getJoke(joke.id) == null) {
-            localDataSource.insertJoke(map(joke.copy(isFavorite = true)))
-        } else {
-            localDataSource.updateFavorite(joke.id, true)
-        }
+        localDataSource.addFavorite(map(joke.copy(isFavorite = true)))
     }
 
     // update a local cached joke to longer be a favorite
