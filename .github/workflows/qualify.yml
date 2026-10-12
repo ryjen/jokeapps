@@ -1,0 +1,95 @@
+name: Mobile qualification (manual)
+
+# Deliberately not scheduled on push/PR until a scoped runner policy is approved.
+# A manual dispatch is the cost-control boundary for hosted runners.
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Qualification target (layout-only by default)"
+        type: choice
+        required: true
+        default: layout
+        options:
+          - layout
+          - android
+          - react-native
+          - all
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jokeapps-qualification-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  layout:
+    name: Repository boundaries
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - run: python3 scripts/verify-layout.py
+      - name: Validate Python syntax
+        run: python3 -B -m py_compile scripts/verify-layout.py
+
+  android:
+    if: ${{ inputs.target == 'android' || inputs.target == 'all' }}
+    name: Android unit tests and lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Provision Android SDK 31
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-31" "build-tools;31.0.0"
+      - name: Gradle unit tests (no emulator)
+        id: unit
+        working-directory: apps/android
+        run: ./gradlew --no-daemon --console=plain test
+      - name: Android lint
+        if: ${{ always() && steps.unit.outcome != 'skipped' }}
+        working-directory: apps/android
+        run: ./gradlew --no-daemon --console=plain lint
+
+  react-native:
+    if: ${{ inputs.target == 'react-native' || inputs.target == 'all' }}
+    name: React Native Jest, TypeScript and lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - name: Activate pinned Yarn Classic
+        run: |
+          corepack prepare yarn@1.22.22 --activate
+      - name: Install dependencies (no lifecycle scripts)
+        id: install
+        working-directory: apps/react-native
+        run: corepack yarn install --frozen-lockfile --non-interactive --ignore-scripts
+      - name: Jest
+        if: ${{ steps.install.outcome == 'success' }}
+        working-directory: apps/react-native
+        run: corepack yarn test --ci --runInBand
+      - name: TypeScript
+        if: ${{ always() && steps.install.outcome == 'success' }}
+        working-directory: apps/react-native
+        run: corepack yarn compile
+      - name: ESLint
+        if: ${{ always() && steps.install.outcome == 'success' }}
+        working-directory: apps/react-native
+        run: corepack yarn lint

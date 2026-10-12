@@ -22,6 +22,8 @@ make android-test # Requires the Android SDK/JDK supported by the historical And
 make rn-test      # Requires Node and Yarn configured for the historical React Native project
 ```
 
+See [build qualification](docs/qualification.md) for the manually dispatched Android/React Native checks and budget boundaries.
+
 Run Android builds in `apps/android`, and React Native/iOS builds in `apps/react-native`. Dependencies, lockfiles and test suites remain owned by those projects. Migration does not imply that the historical build toolchains work with current SDKs.
 
 ## History and licensing

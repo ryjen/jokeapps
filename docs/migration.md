@@ -25,7 +25,7 @@ Each source history is imported via `git subtree add` **without** `--squash`, pr
 
 1. Confirm layout verification and source provenance.
 2. Confirm Android and React Native tests in isolated environments with compatible SDKs.
-3. Add root CI workflow integration with approved runners and path-scoped jobs; avoid accidental macOS emulator or hosted-minute cost.
+3. Use the root [manual qualification workflow](qualification.md) for opt-in Android and React Native checks. Automatic path-scoped jobs require a separately approved runner policy; do not introduce unbounded hosted builds.
 4. Review any repository-level references, branch protection and URLs that still point to the former repositories.
 5. Merge the migration branch after verification.
 6. Update source repositories with archival notices and archive them **only after** successful cutover. Do not delete source repositories because they retain independent issues, release assets and audit trails.
