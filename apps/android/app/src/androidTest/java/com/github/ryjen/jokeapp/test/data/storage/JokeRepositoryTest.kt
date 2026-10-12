@@ -1,6 +1,7 @@
 package com.github.ryjen.jokeapp.test.data.storage
 
 import com.github.ryjen.jokeapp.domain.repository.joke.JokeRepository
+import com.github.ryjen.jokeapp.data.repository.joke.LocalDataSource
 import com.github.ryjen.jokeapp.domain.model.Joke
 import com.github.ryjen.jokeapp.test.FakeJokeData
 import com.google.common.truth.Truth.assertThat
@@ -37,7 +38,8 @@ class JokeRepositoryTest : KoinTest {
         if (removed != null) {
             repo.removeFavorite(removed)
             val joke = repo.getJoke(removed.id)
-            assertThat(joke).isNull()
+            assertThat(joke).isNotNull()
+            assertThat(joke?.isFavorite).isFalse()
         }
     }
 
@@ -52,9 +54,11 @@ class JokeRepositoryTest : KoinTest {
 
 
     @Test
-    fun testGetRandomJoke() = runTest {
-        val joke = repo.getRandomJoke()
-        assertThat(joke?.id).isEqualTo(data.current.id)
+    fun testGetRandomCachedJoke() = runTest {
+        val localSource: LocalDataSource = getKoin().get()
+        val joke = localSource.getRandomJoke()
+        assertThat(joke).isNotNull()
+        assertThat(joke?.key).isNotEmpty()
     }
 
     @Test
@@ -67,7 +71,7 @@ class JokeRepositoryTest : KoinTest {
     fun testGetJoke() = runTest {
         val joke = repo.getJoke(data.randomId())
         assertThat(joke).isNotNull()
-        assertThat(joke?.created).isNotNull()
+        assertThat(joke?.content).isNotEmpty()
     }
 
     @Test

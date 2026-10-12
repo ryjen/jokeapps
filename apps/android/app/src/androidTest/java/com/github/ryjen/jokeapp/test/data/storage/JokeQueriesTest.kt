@@ -20,7 +20,7 @@ class JokeDaoTest : KoinTest {
             id = 123,
             key = "123",
             content = "testing 123",
-            created = null,
+            created = java.util.Date(),
             isFavorite = false
         )
         db.jokeQueries.insert(

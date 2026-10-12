@@ -8,7 +8,7 @@ private val faker = Faker()
 private val rand = Random(System.currentTimeMillis())
 
 fun randomJoke(): Joke {
-    val id = faker.idNumber()
+    val id = faker.idNumber().valid()
     val content = faker.lorem().paragraph(rand.nextInt(4, 8))
     return Joke(id.toString(), content)
 }

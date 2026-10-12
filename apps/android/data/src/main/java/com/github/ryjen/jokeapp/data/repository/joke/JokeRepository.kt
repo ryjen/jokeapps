@@ -33,16 +33,12 @@ class JokeRepository(
         remoteDataSource.getJoke(id)?.let { map(it) }
     }
 
-    // add or update a local cache joke to be a favorite
-    override suspend fun addFavorite(joke: DomainJoke) = try {
-        localDataSource.updateFavorite(joke.id, true)
-        // add to remote service
-    } catch (t: Throwable) {
-        try {
+    // UPDATE does not fail when no row matches. Check presence before deciding to insert.
+    override suspend fun addFavorite(joke: DomainJoke) {
+        if (localDataSource.getJoke(joke.id) == null) {
             localDataSource.insertJoke(map(joke.copy(isFavorite = true)))
-        } catch (e: Throwable) {
-            Timber.e("error adding joke", e)
-            throw e
+        } else {
+            localDataSource.updateFavorite(joke.id, true)
         }
     }
 
