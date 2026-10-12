@@ -16,7 +16,7 @@
     "@react-navigation/bottom-tabs": "^6.4.0",
     "@react-navigation/native": "^6.0.8",
     "@reduxjs/toolkit": "^1.6.2",
-    "awilix": "^8.0.1",
+    "awilix": "^4.0.0",
     "i18next": "^23.5.1",
     "native-base": "^3.4.17",
     "react": "18.2.0",

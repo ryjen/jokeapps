@@ -1,4 +1,3 @@
-import type {Joke} from '@domain/types'
 import {useSelector} from 'react-redux'
 import React from 'react'
 import {HStack, IconButton, useColorMode} from 'native-base'
