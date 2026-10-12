@@ -46,7 +46,20 @@ The Android project declares Gradle 7.4, AGP 7.3.1, Kotlin 1.6.10 and SDK 31. Re
   - `app-debug.apk`: **10,390,867 bytes**, SHA-256 `7ab4c24898b220659977ce2e6f4eff5087276f092e0c9796edbca37a804f904c`
   - `app-release-unsigned.apk`: **2,627,566 bytes**, SHA-256 `00042d9b7f4a4f10e4c94030d3fbe82699db9973afc7a67f652dfb2f15d90088`
 
-**Remaining gates:** no Android emulator installation or instrumented-test execution; no production release signing, signing-key custody, Play publishing, iOS Xcode build, or RN native Android/iOS packaging was validated. These generated APKs were ephemeral runner outputs, **not** uploaded release artifacts. The Node 20 deprecation warning for pinned setup actions persists and can be resolved separately.
+**Gates remaining at the time of run #38207261130:** Android instrumentation was not yet covered (it was subsequently qualified below); no production release signing, signing-key custody, Play publishing, iOS Xcode build, or RN native Android/iOS packaging was validated. These generated APKs were ephemeral runner outputs, **not** uploaded release artifacts. The Node 20 deprecation warning for pinned setup actions persists and can be resolved separately.
+
+## Verified Android instrumentation — October 12, 2026 (Pacific)
+
+[GitHub Actions run #38225992867](https://github.com/ryjen/jokeapps/actions/runs/38225992867) completed **successfully** on exact source commit `d65ec7e287bdbea117224725140a8041af0ee6e8` (isolated `fix/android-instrumentation-target-20261011`). The only additional file at this verification commit, relative to the proposed source merge, was a **branch/path-scoped one-shot workflow**. It is removed from the merge candidate; the Android application and test sources are unchanged by that removal.
+
+- GitHub-hosted Ubuntu, **Java 17**, Android **API 31 Google APIs x86_64 emulator**, Linux KVM, historical Gradle **7.4**. One-shot job limited to **30 minutes**, read-only GitHub token, SHA-pinned actions, no persistent push/PR workflow enabled on `main`.
+- `(cd apps/android && ./gradlew --no-daemon --console=plain :app:connectedDebugAndroidTest --stacktrace)`: **PASS**, `BUILD SUCCESSFUL in 4m 27s`.
+- Actual JUnit XML was parsed and gate-checked: **19 instrumented tests, 0 failures, 0 errors, 0 skipped**; an empty or partially skipped test suite would not qualify. The instrumentation target is now the application itself, rather than a test-only Android library process.
+- The test harness uses an explicit test-only `Application`/Koin graph, debug-only Compose test host, and Android in-memory SQLite fixture. The SQLDelight `UPDATE`/`DELETE` queries use Android-compatible single-row subqueries instead of unsupported `... LIMIT 1` mutations.
+- A prior [run #38225179416](https://github.com/ryjen/jokeapps/actions/runs/38225179416) ran all 19 tests with one failure caused by duplicate fixture keys in the shared in-memory database; the final qualification used separate keys. This is a positive run on the fixed source, not evidence of independent rerun consistency.
+- Follow-up [#11](https://github.com/ryjen/jokeapps/issues/11) tracks production **external-key uniqueness and atomic favorite-cache upserts**, which need a migration review and concurrency/regression coverage.
+
+**Not covered:** production-signed release or key custody, Play distribution, iOS Xcode build, RN native app packaging, and repeatability across multiple emulator environments. The earlier debug/unsigned-release APK build was qualified on older source and is separate evidence.
 
 ## Acceptance
 
