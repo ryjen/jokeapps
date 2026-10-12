@@ -1,0 +1,17 @@
+-- Upgrade the original nonunique external-key cache (schema version 1).
+-- Keep the newest row (largest autoincrement id) for each external joke key.
+-- Preserve favorite state if ANY historical duplicate was marked favorite.
+-- The retained row's content and created timestamp are not rewritten.
+UPDATE joke
+SET isFavorite = (
+    SELECT MAX(duplicate.isFavorite)
+    FROM joke AS duplicate
+    WHERE duplicate.key = joke.key
+)
+WHERE id IN (SELECT MAX(id) FROM joke GROUP BY key);
+
+DELETE FROM joke
+WHERE id NOT IN (SELECT MAX(id) FROM joke GROUP BY key);
+
+DROP INDEX joke_key;
+CREATE UNIQUE INDEX joke_key ON joke(key);
