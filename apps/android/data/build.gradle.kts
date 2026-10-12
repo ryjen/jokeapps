@@ -44,4 +44,5 @@ dependencies {
 
     testImplementation(Dependencies.JUnit)
     testImplementation(Dependencies.Kotlin.Test)
+    testImplementation(Dependencies.Ktor.Mock)
 }

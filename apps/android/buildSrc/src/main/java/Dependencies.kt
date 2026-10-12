@@ -70,6 +70,7 @@ object Dependencies {
         const val Client = "io.ktor:ktor-client-core:$version"
         const val Logback = "ch.qos.logback:logback-classic:1.2.11"
         const val test = "io.ktor:ktor-server-test-host:$version"
+        const val Mock = "io.ktor:ktor-client-mock:$version"
 
     }
 
