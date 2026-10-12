@@ -1,6 +1,7 @@
 package com.github.ryjen.jokeapp.data.repository.joke
 
 import com.github.ryjen.jokeapp.data.mapping.JokeMapper
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import timber.log.Timber
@@ -18,19 +19,30 @@ class JokeRepository(
             list.map { map(it) }
         }
 
-    // random joke attempts remote and defaults to local cache
-    override suspend fun getRandomJoke(): DomainJoke? = try {
-        remoteDataSource.getRandomJoke()?.let { map(it) }
-    } catch (e: Throwable) {
-        localDataSource.getRandomJoke()?.let { map(it) }
+    // Prefer a remote random joke, falling back to cache for offline/no-result cases.
+    override suspend fun getRandomJoke(): DomainJoke? {
+        val remote = try {
+            remoteDataSource.getRandomJoke()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Timber.e(e, "error fetching remote random joke")
+            null
+        }
+        return remote?.let { map(it) } ?: localDataSource.getRandomJoke()?.let { map(it) }
     }
 
-    // get joke attempts local and defaults to remote source
-    override suspend fun getJoke(id: String): DomainJoke? = try {
-        localDataSource.getJoke(id)?.let { map(it) }
-    } catch (e: Throwable) {
-        Timber.e("error fetching local joke", e)
-        remoteDataSource.getJoke(id)?.let { map(it) }
+    // A normal cache miss is not an exception: query remote when absent.
+    override suspend fun getJoke(id: String): DomainJoke? {
+        val cached = try {
+            localDataSource.getJoke(id)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Timber.e(e, "error fetching local joke")
+            null
+        }
+        return cached?.let { map(it) } ?: remoteDataSource.getJoke(id)?.let { map(it) }
     }
 
     // UPDATE does not fail when no row matches. Check presence before deciding to insert.
