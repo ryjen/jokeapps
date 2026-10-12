@@ -1,3 +1,5 @@
+> **Moved to the [JokeApps monorepo](https://github.com/ryjen/jokeapps/tree/main/security/pentest).** This repository is retained for its independent Git history. The Frida security research sources now live in the JokeApps monorepo.
+
 
 # JokeApp Security
 
