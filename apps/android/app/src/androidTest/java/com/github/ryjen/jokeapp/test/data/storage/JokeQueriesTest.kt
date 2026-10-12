@@ -39,7 +39,7 @@ class JokeDaoTest : KoinTest {
     fun testDeleteJoke() = runTest {
         val expected = Joke(
             id = 123,
-            key = "123",
+            key = "123-delete",
             content = "testing 123",
             created = null,
             isFavorite = false

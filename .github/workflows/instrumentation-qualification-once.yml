@@ -1,4 +1,4 @@
-# Final source candidate: Android SQLite portable syntax and corrected favorite test contracts.
+# Qualification: avoid cross-test collisions on shared in-memory DAO fixture.
 name: JokeApps app instrumentation qualification (one-shot)
 on:
   push:
