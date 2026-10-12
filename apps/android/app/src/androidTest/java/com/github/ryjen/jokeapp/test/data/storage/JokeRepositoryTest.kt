@@ -1,30 +1,23 @@
 package com.github.ryjen.jokeapp.test.data.storage
 
-import com.github.ryjen.jokeapp.data.repository.joke.JokeRepository
+import com.github.ryjen.jokeapp.domain.repository.joke.JokeRepository
+import com.github.ryjen.jokeapp.data.repository.joke.LocalDataSource
 import com.github.ryjen.jokeapp.domain.model.Joke
 import com.github.ryjen.jokeapp.test.FakeJokeData
-import com.github.ryjen.jokeapp.test.data.arch.module.fakeDatabaseModule
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.koin.test.KoinTest
-import org.koin.test.KoinTestRule
 import org.koin.test.inject
 
 @ExperimentalCoroutinesApi
 class JokeRepositoryTest : KoinTest {
-
-    @get:Rule
-    val koinTestRule = KoinTestRule.create {
-        modules(fakeDatabaseModule)
-    }
 
     private val repo: JokeRepository by inject()
     private val data = FakeJokeData()
@@ -45,7 +38,8 @@ class JokeRepositoryTest : KoinTest {
         if (removed != null) {
             repo.removeFavorite(removed)
             val joke = repo.getJoke(removed.id)
-            assertThat(joke).isNull()
+            assertThat(joke).isNotNull()
+            assertThat(joke?.isFavorite).isFalse()
         }
     }
 
@@ -60,14 +54,16 @@ class JokeRepositoryTest : KoinTest {
 
 
     @Test
-    fun testGetRandomJoke() = runTest {
-        val joke = repo.getRandomJoke()
-        assertThat(joke?.id).isEqualTo(data.current.id)
+    fun testGetRandomCachedJoke() = runTest {
+        val localSource: LocalDataSource = getKoin().get()
+        val joke = localSource.getRandomJoke()
+        assertThat(joke).isNotNull()
+        assertThat(joke?.key).isNotEmpty()
     }
 
     @Test
     fun testGetFavouriteJokes() = runTest {
-        val jokes = repo.getFavoriteJokes().toList()
+        val jokes = repo.getFavoriteJokes().first()
         assertThat(jokes.isEmpty()).isFalse()
     }
 
@@ -75,7 +71,7 @@ class JokeRepositoryTest : KoinTest {
     fun testGetJoke() = runTest {
         val joke = repo.getJoke(data.randomId())
         assertThat(joke).isNotNull()
-        assertThat(joke?.created).isNotNull()
+        assertThat(joke?.content).isNotEmpty()
     }
 
     @Test

@@ -24,11 +24,11 @@ favorites:
 SELECT * FROM joke WHERE isFavorite = 1 ORDER BY created;
 
 updateFavorite:
-UPDATE joke SET isFavorite = :isFavorite WHERE key = :key OR id = :key LIMIT 1;
+UPDATE joke SET isFavorite = :isFavorite WHERE id = (SELECT id FROM joke WHERE key = :key OR id = :key LIMIT 1);
 
 insert:
 INSERT INTO joke(key, content, created, isFavorite) VALUES(?, ?, ?, ?);
 
 delete:
-DELETE FROM joke WHERE key = :key OR id = :key LIMIT 1;
+DELETE FROM joke WHERE id = (SELECT id FROM joke WHERE key = :key OR id = :key LIMIT 1);
 

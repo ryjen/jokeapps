@@ -12,9 +12,14 @@ android {
         applicationId = "com.github.ryjen.jokeapp"
         minSdk = Versions.Sdk.Min
         targetSdk = Versions.Sdk.Target
+        testInstrumentationRunner = "com.github.ryjen.jokeapp.test.TestRunner"
         versionCode = 1
         versionName = "1.0"
         vectorDrawables.useSupportLibrary = true
+    }
+
+    testOptions {
+        animationsDisabled = true
     }
 
     buildFeatures {
@@ -96,6 +101,21 @@ dependencies {
     implementation(Dependencies.AndroidX.Activity)
     implementation(Dependencies.Koin.Android)
 
+    // The default ComposeTestRule host activity is registered only for debug builds.
+    debugImplementation(Dependencies.ComposeX.TestManifest)
+
     androidTestImplementation(project(":test"))
+    androidTestImplementation(Dependencies.JUnit)
+    androidTestImplementation(Dependencies.Fake)
+    androidTestImplementation(Dependencies.CoroutinesX.Test)
+    androidTestImplementation(Dependencies.Koin.Android)
+    androidTestImplementation(Dependencies.Koin.JUnit)
+    androidTestImplementation(Dependencies.Koin.Test)
+    androidTestImplementation(Dependencies.Mockk.Android)
+    androidTestImplementation(Dependencies.ComposeX.Test)
+    androidTestImplementation(Dependencies.Espresso.Intents)
+    androidTestImplementation(Dependencies.Truth)
+    androidTestImplementation(Dependencies.SqlDelight.Test)
+    androidTestImplementation(Dependencies.SqlDelight.Android)
     testImplementation(project(":test"))
 }
