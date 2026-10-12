@@ -35,6 +35,19 @@ The Android project declares Gradle 7.4, AGP 7.3.1, Kotlin 1.6.10 and SDK 31. Re
 - **Not covered:** instrumentation/emulator, installable APK and signed release build, iOS, or React Native parity in GitHub-hosted Actions. Passing lint does not mean zero informational warnings.
 - Recorded toolchain warning: the SHA-pinned checkout/setup-java v4 actions are Node 20-based and the runner forces Node 24. Upgrading action majors can be reviewed separately without changing these verified source results.
 
+
+## Verified hosted mobile qualification — October 11, 2026 (Pacific)
+
+[GitHub Actions run #38207261130](https://github.com/ryjen/jokeapps/actions/runs/38207261130) completed with **success** on an isolated `verify/mobile-qualification-20261012` branch, at `795a7c6ce17ac26626ff44ab4d44e956a39b3f67`. This branch was based on canonical `main` commit `a8bf9f92174f01b11ceaf911d4c4539c4594e72d`; its only change was the one-shot workflow. Both jobs ran on GitHub-hosted Ubuntu with full-SHA-pinned setup actions, a read-only token, and 20/25-minute job caps. No automatic workflow was added to `main`.
+
+- **React Native:** Node 24, Yarn 1.22.22; frozen installation with dependency lifecycle scripts disabled **passed**. `corepack yarn test --ci --runInBand`: **2 suites, 2 tests, 1 snapshot passed**. `corepack yarn compile` and `corepack yarn lint`: **passed**.
+- **Android APK packaging:** Java 17, SDK 31 and historical Gradle 7.4 wrapper; `./gradlew --no-daemon --console=plain :app:assembleDebug :app:assembleRelease --stacktrace`: **passed** (`BUILD SUCCESSFUL in 4m 5s`).
+- APK presence, non-empty size, ZIP integrity and embedded `AndroidManifest.xml` were checked for both variants. Checksums printed by the runner:
+  - `app-debug.apk`: **10,390,867 bytes**, SHA-256 `7ab4c24898b220659977ce2e6f4eff5087276f092e0c9796edbca37a804f904c`
+  - `app-release-unsigned.apk`: **2,627,566 bytes**, SHA-256 `00042d9b7f4a4f10e4c94030d3fbe82699db9973afc7a67f652dfb2f15d90088`
+
+**Remaining gates:** no Android emulator installation or instrumented-test execution; no production release signing, signing-key custody, Play publishing, iOS Xcode build, or RN native Android/iOS packaging was validated. These generated APKs were ephemeral runner outputs, **not** uploaded release artifacts. The Node 20 deprecation warning for pinned setup actions persists and can be resolved separately.
+
 ## Acceptance
 
 Capture tool versions, commands, runner identity, commit SHA and exit statuses. Do not archive the remaining original source repositories until both workspaces have repeatable green checks or an explicit historical/archival exception is approved.
