@@ -9,7 +9,7 @@ CREATE TABLE joke (
   isFavorite INTEGER AS Boolean NOT NULL DEFAULT 0
 );
 
-CREATE INDEX joke_key ON joke(key);
+CREATE UNIQUE INDEX joke_key ON joke(key);
 
 random:
 SELECT * FROM joke ORDER BY RANDOM() LIMIT 1;
@@ -28,6 +28,9 @@ UPDATE joke SET isFavorite = :isFavorite WHERE id = (SELECT id FROM joke WHERE k
 
 insert:
 INSERT INTO joke(key, content, created, isFavorite) VALUES(?, ?, ?, ?);
+
+insertOrIgnore:
+INSERT OR IGNORE INTO joke(key, content, created, isFavorite) VALUES(?, ?, ?, ?);
 
 delete:
 DELETE FROM joke WHERE id = (SELECT id FROM joke WHERE key = :key LIMIT 1);
