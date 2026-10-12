@@ -28,6 +28,6 @@ Each source history is imported via `git subtree add` **without** `--squash`, pr
 3. Use the root [manual qualification workflow](qualification.md) for opt-in Android and React Native checks. Automatic path-scoped jobs require a separately approved runner policy; do not introduce unbounded hosted builds.
 4. Review any repository-level references, branch protection and URLs that still point to the former repositories.
 5. Merge the migration branch after verification.
-6. Update source repositories with archival notices and archive them **only after** successful cutover. Do not delete source repositories because they retain independent issues, release assets and audit trails.
+6. Update source repositories with archival notices and archive them **only after** successful cutover. As of October 12, 2026, all three originals are **private and archived**, while the canonical monorepo is **public**. Do not delete originals as a routine cleanup: they retain independent issues, release assets and audit trails.
 
 No claim of runtime build compatibility or completed remote publication is made by this migration record.

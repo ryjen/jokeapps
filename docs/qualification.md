@@ -63,4 +63,4 @@ The Android project declares Gradle 7.4, AGP 7.3.1, Kotlin 1.6.10 and SDK 31. Re
 
 ## Acceptance
 
-Capture tool versions, commands, runner identity, commit SHA and exit statuses. Do not archive the remaining original source repositories until both workspaces have repeatable green checks or an explicit historical/archival exception is approved.
+Capture tool versions, commands, runner identity, commit SHA and exit statuses. All three original source repositories were verified private and archived on October 12, 2026. Keep them as read-only historical references; deletion is a separate decision requiring independent private backups, repository metadata/link impact review, and explicit authorization.
