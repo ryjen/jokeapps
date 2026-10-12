@@ -112,6 +112,7 @@ object Dependencies {
         const val Animation = "androidx.compose.animation:animation:$version"
         const val Tooling = "androidx.compose.ui:ui-tooling:$version"
         const val Test = "androidx.compose.ui:ui-test-junit4:$version"
+        const val TestManifest = "androidx.compose.ui:ui-test-manifest:$version"
     }
 
     object Espresso {

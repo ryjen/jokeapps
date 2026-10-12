@@ -9,7 +9,6 @@ import androidx.compose.ui.test.performClick
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
-import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.github.ryjen.jokeapp.MainActivity
 import com.github.ryjen.jokeapp.data.repository.joke.JokeRepository
 import com.github.ryjen.jokeapp.test.module.fakeAppModules
@@ -25,13 +24,14 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.koin.test.KoinTest
 import org.koin.test.KoinTestRule
+import androidx.test.core.app.ApplicationProvider
+import org.koin.android.ext.koin.androidContext
 import org.koin.test.inject
 
 class RandomJokeScreenTest : KoinTest {
 
-    private val activityTestRule = ActivityScenarioRule(MainActivity::class.java)
-
     private val koinTestRule = KoinTestRule.create {
+        androidContext(ApplicationProvider.getApplicationContext())
         modules(fakeAppModules)
     }
 
@@ -40,7 +40,6 @@ class RandomJokeScreenTest : KoinTest {
     @get:Rule
     val rule: RuleChain = RuleChain
         .outerRule(koinTestRule)
-        .around(activityTestRule)
         .around(composeTestRule)
 
     private val repo: JokeRepository by inject()

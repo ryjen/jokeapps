@@ -101,6 +101,9 @@ dependencies {
     implementation(Dependencies.AndroidX.Activity)
     implementation(Dependencies.Koin.Android)
 
+    // The default ComposeTestRule host activity is registered only for debug builds.
+    debugImplementation(Dependencies.ComposeX.TestManifest)
+
     androidTestImplementation(project(":test"))
     androidTestImplementation(Dependencies.JUnit)
     androidTestImplementation(Dependencies.Fake)
@@ -113,5 +116,6 @@ dependencies {
     androidTestImplementation(Dependencies.Espresso.Intents)
     androidTestImplementation(Dependencies.Truth)
     androidTestImplementation(Dependencies.SqlDelight.Test)
+    androidTestImplementation(Dependencies.SqlDelight.Android)
     testImplementation(project(":test"))
 }

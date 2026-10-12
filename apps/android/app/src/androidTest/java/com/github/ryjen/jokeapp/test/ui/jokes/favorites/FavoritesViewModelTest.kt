@@ -12,6 +12,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.koin.test.KoinTest
 import org.koin.test.KoinTestRule
+import androidx.test.core.app.ApplicationProvider
+import org.koin.android.ext.koin.androidContext
 import org.koin.test.inject
 
 @ExperimentalCoroutinesApi
@@ -19,6 +21,7 @@ class FavoritesViewModelTest : KoinTest {
 
     @get:Rule
     val koinTestRule = KoinTestRule.create {
+        androidContext(ApplicationProvider.getApplicationContext())
         modules(fakeAppModules)
     }
 

@@ -1,9 +1,8 @@
 package com.github.ryjen.jokeapp.test.data.storage
 
-import com.github.ryjen.jokeapp.data.repository.joke.JokeRepository
+import com.github.ryjen.jokeapp.domain.repository.joke.JokeRepository
 import com.github.ryjen.jokeapp.domain.model.Joke
 import com.github.ryjen.jokeapp.test.FakeJokeData
-import com.github.ryjen.jokeapp.test.data.arch.module.fakeDatabaseModule
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -15,7 +14,10 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.koin.test.KoinTest
+import com.github.ryjen.jokeapp.test.module.fakeAppModules
 import org.koin.test.KoinTestRule
+import androidx.test.core.app.ApplicationProvider
+import org.koin.android.ext.koin.androidContext
 import org.koin.test.inject
 
 @ExperimentalCoroutinesApi
@@ -23,7 +25,8 @@ class JokeRepositoryTest : KoinTest {
 
     @get:Rule
     val koinTestRule = KoinTestRule.create {
-        modules(fakeDatabaseModule)
+        androidContext(ApplicationProvider.getApplicationContext())
+        modules(fakeAppModules)
     }
 
     private val repo: JokeRepository by inject()

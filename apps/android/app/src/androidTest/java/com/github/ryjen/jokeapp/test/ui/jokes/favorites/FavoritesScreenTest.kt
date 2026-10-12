@@ -5,7 +5,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.github.javafaker.Faker
 import com.github.ryjen.jokeapp.MainActivity
 import com.github.ryjen.jokeapp.data.repository.joke.JokeRepository
@@ -23,13 +22,14 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.koin.test.KoinTest
 import org.koin.test.KoinTestRule
+import androidx.test.core.app.ApplicationProvider
+import org.koin.android.ext.koin.androidContext
 import org.koin.test.inject
 
 class FavoritesScreenTest : KoinTest {
 
-    private val activityTestRule = ActivityScenarioRule(MainActivity::class.java)
-
     private val koinTestRule = KoinTestRule.create {
+        androidContext(ApplicationProvider.getApplicationContext())
         modules(fakeAppModules)
     }
 
@@ -38,7 +38,6 @@ class FavoritesScreenTest : KoinTest {
     @get:Rule
     val rule: RuleChain = RuleChain
         .outerRule(koinTestRule)
-        .around(activityTestRule)
         .around(composeTestRule)
 
     private val faker = Faker()
