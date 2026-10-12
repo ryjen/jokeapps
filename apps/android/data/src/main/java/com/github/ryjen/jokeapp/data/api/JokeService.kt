@@ -6,7 +6,8 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.appendPathSegments
+import io.ktor.http.appendEncodedPathSegments
+import java.net.URLEncoder
 import kotlinx.coroutines.CancellationException
 import timber.log.Timber
 
@@ -21,8 +22,10 @@ class JokeService(
         if (id.isBlank()) return null
         return fetch {
             client.get(BASE_URL) {
-                // Keep the untrusted identifier in one encoded URL path segment.
-                url { appendPathSegments("j", id, encodeSlash = true) }
+                // Ktor 2.0.1 appendPathSegments does not escape '/' or existing '%xx'.
+                // Encode the entire untrusted identifier before appending one segment.
+                val escapedId = URLEncoder.encode(id, Charsets.UTF_8.name()).replace("+", "%20")
+                url { appendEncodedPathSegments("j", escapedId) }
             }
         }
     }
