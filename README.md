@@ -28,7 +28,7 @@ Run Android builds in `apps/android`, and React Native/iOS builds in `apps/react
 
 ## History and licensing
 
-The former repositories were incorporated using non-squashed Git subtree merges. The original commit graphs remain reachable through Git history. See [migration notes](docs/migration.md) for source refs and follow-up validation.
+The former repositories were incorporated using non-squashed Git subtree merges. The original commit graphs remain reachable through Git history. See [migration notes](docs/migration.md) for source refs and follow-up validation, and [legacy history](docs/legacy-history.md) for preserved historical branch tips and deletion boundaries.
 
 The native Android project has its own [GPL-3.0 license](apps/android/LICENSE). Do not assume that license governs the React Native or security directories; investigate their respective licensing before redistributing.
 
