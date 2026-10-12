@@ -2,6 +2,7 @@ package com.github.ryjen.jokeapp.data.api
 
 import com.github.ryjen.jokeapp.data.model.JokeResponse
 import io.ktor.client.*
+import kotlinx.coroutines.CancellationException
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import timber.log.Timber
@@ -13,14 +14,18 @@ class JokeService(
 ) {
     suspend fun getRandomJoke(): JokeResponse? = try {
         client.get(BASE_URL).body()
-    } catch (ex: Throwable) {
+    } catch (ex: CancellationException) {
+        throw ex
+    } catch (ex: Exception) {
         Timber.d(ex)
         null
     }
 
     suspend fun getJoke(id: String): JokeResponse? = try {
         client.get("$BASE_URL/j/$id").body()
-    } catch (ex: Throwable) {
+    } catch (ex: CancellationException) {
+        throw ex
+    } catch (ex: Exception) {
         Timber.d(ex)
         null
     }
