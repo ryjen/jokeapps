@@ -7,28 +7,19 @@ import com.google.common.truth.Truth.assertThat
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.koin.test.KoinTest
-import com.github.ryjen.jokeapp.test.module.fakeAppModules
-import org.koin.test.KoinTestRule
-import androidx.test.core.app.ApplicationProvider
-import org.koin.android.ext.koin.androidContext
 import org.koin.test.inject
 
 @ExperimentalCoroutinesApi
 class JokeRepositoryTest : KoinTest {
 
     @get:Rule
-    val koinTestRule = KoinTestRule.create {
-        androidContext(ApplicationProvider.getApplicationContext())
-        modules(fakeAppModules)
-    }
-
     private val repo: JokeRepository by inject()
     private val data = FakeJokeData()
 
@@ -70,7 +61,7 @@ class JokeRepositoryTest : KoinTest {
 
     @Test
     fun testGetFavouriteJokes() = runTest {
-        val jokes = repo.getFavoriteJokes().toList()
+        val jokes = repo.getFavoriteJokes().first()
         assertThat(jokes.isEmpty()).isFalse()
     }
 

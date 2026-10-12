@@ -11,7 +11,6 @@ import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
 import com.github.ryjen.jokeapp.MainActivity
 import com.github.ryjen.jokeapp.data.repository.joke.JokeRepository
-import com.github.ryjen.jokeapp.test.module.fakeAppModules
 import com.github.ryjen.jokeapp.test.randomJoke
 import com.github.ryjen.jokeapp.ui.jokes.random.RandomJokeScreen
 import com.github.ryjen.jokeapp.ui.jokes.random.RandomJokeViewModel
@@ -21,30 +20,20 @@ import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.RuleChain
 import org.koin.test.KoinTest
-import org.koin.test.KoinTestRule
-import androidx.test.core.app.ApplicationProvider
-import org.koin.android.ext.koin.androidContext
 import org.koin.test.inject
+import org.koin.core.parameter.parametersOf
+import com.github.ryjen.jokeapp.ui.navigation.Router
+import io.mockk.mockk
 
 class RandomJokeScreenTest : KoinTest {
 
-    private val koinTestRule = KoinTestRule.create {
-        androidContext(ApplicationProvider.getApplicationContext())
-        modules(fakeAppModules)
-    }
-
-    private val composeTestRule = createComposeRule()
-
     @get:Rule
-    val rule: RuleChain = RuleChain
-        .outerRule(koinTestRule)
-        .around(composeTestRule)
+    val composeTestRule = createComposeRule()
 
     private val repo: JokeRepository by inject()
 
-    private val viewModel: RandomJokeViewModel by inject()
+    private val viewModel: RandomJokeViewModel by inject(parameters = { parametersOf(mockk<Router>(relaxed = true)) })
 
     companion object {
 

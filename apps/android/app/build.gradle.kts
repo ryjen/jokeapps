@@ -12,7 +12,7 @@ android {
         applicationId = "com.github.ryjen.jokeapp"
         minSdk = Versions.Sdk.Min
         targetSdk = Versions.Sdk.Target
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.github.ryjen.jokeapp.test.TestRunner"
         versionCode = 1
         versionName = "1.0"
         vectorDrawables.useSupportLibrary = true

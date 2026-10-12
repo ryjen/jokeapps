@@ -9,7 +9,6 @@ import com.github.javafaker.Faker
 import com.github.ryjen.jokeapp.MainActivity
 import com.github.ryjen.jokeapp.data.repository.joke.JokeRepository
 import com.github.ryjen.jokeapp.domain.model.Joke
-import com.github.ryjen.jokeapp.test.module.fakeAppModules
 import com.github.ryjen.jokeapp.ui.jokes.favourites.FavoritesScreen
 import com.github.ryjen.jokeapp.ui.jokes.favourites.FavoritesViewModel
 import com.github.ryjen.jokeapp.ui.theme.MainTheme
@@ -19,26 +18,13 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.RuleChain
 import org.koin.test.KoinTest
-import org.koin.test.KoinTestRule
-import androidx.test.core.app.ApplicationProvider
-import org.koin.android.ext.koin.androidContext
 import org.koin.test.inject
 
 class FavoritesScreenTest : KoinTest {
 
-    private val koinTestRule = KoinTestRule.create {
-        androidContext(ApplicationProvider.getApplicationContext())
-        modules(fakeAppModules)
-    }
-
-    private val composeTestRule = createComposeRule()
-
     @get:Rule
-    val rule: RuleChain = RuleChain
-        .outerRule(koinTestRule)
-        .around(composeTestRule)
+    val composeTestRule = createComposeRule()
 
     private val faker = Faker()
 

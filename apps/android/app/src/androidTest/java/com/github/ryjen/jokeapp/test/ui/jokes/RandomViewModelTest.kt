@@ -2,7 +2,6 @@ package com.github.ryjen.jokeapp.test.ui.jokes
 
 import com.github.ryjen.jokeapp.data.repository.joke.JokeRepository
 import com.github.ryjen.jokeapp.domain.model.Joke
-import com.github.ryjen.jokeapp.test.module.fakeAppModules
 import com.github.ryjen.jokeapp.test.randomJoke
 import com.github.ryjen.jokeapp.ui.jokes.random.RandomJokeAction
 import com.github.ryjen.jokeapp.ui.jokes.random.RandomJokeViewModel
@@ -13,21 +12,16 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.koin.test.KoinTest
-import org.koin.test.KoinTestRule
-import androidx.test.core.app.ApplicationProvider
-import org.koin.android.ext.koin.androidContext
 import org.koin.test.inject
+import org.koin.core.parameter.parametersOf
+import com.github.ryjen.jokeapp.ui.navigation.Router
+import io.mockk.mockk
 
 @ExperimentalCoroutinesApi
 class RandomViewModelTest : KoinTest {
 
     @get:Rule
-    val koinTestRule = KoinTestRule.create {
-        androidContext(ApplicationProvider.getApplicationContext())
-        modules(fakeAppModules)
-    }
-
-    private val viewModel: RandomJokeViewModel by inject()
+    private val viewModel: RandomJokeViewModel by inject(parameters = { parametersOf(mockk<Router>(relaxed = true)) })
 
     private val repo: JokeRepository by inject()
 

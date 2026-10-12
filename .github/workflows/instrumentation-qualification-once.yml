@@ -1,3 +1,4 @@
+# Attempt 2: use an instrumented TestApplication instead of KoinTestRule.
 name: JokeApps app instrumentation qualification (one-shot)
 on:
   push:
