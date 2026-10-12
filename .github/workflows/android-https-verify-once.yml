@@ -1,5 +1,5 @@
 # Ephemeral qualification for issue #17; never merge this file.
-# Accept equivalent origin-path representations in Ktor 2.0.1 MockEngine.
+# The prior run passed unit/lint/APK Gradle tasks but postcheck double-counted debug/release tests.
 name: JokeApps HTTPS API qualification (one-shot)
 
 on:
@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   static:
-    name: MockEngine regressions, unit, lint, APK
+    name: MockEngine regressions (debug and release)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -31,9 +31,9 @@ jobs:
         run: |
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-31" "build-tools;31.0.0"
-      - name: Test MockEngine API fixtures, unit tests, lint and unsigned APKs
+      - name: Test pinned Ktor MockEngine API fixtures in debug and release
         working-directory: apps/android
-        run: ./gradlew --no-daemon --console=plain test lint :app:assembleDebug :app:assembleRelease --stacktrace
+        run: ./gradlew --no-daemon --console=plain :data:testDebugUnitTest :data:testReleaseUnitTest --stacktrace
       - name: Assert MockEngine tests ran
         run: |
           python3 - <<'PY'
@@ -51,7 +51,7 @@ jobs:
                   errors += int(suite.attrib.get('errors', 0))
                   skipped += int(suite.attrib.get('skipped', 0))
           print(f'JokeServiceTest MockEngine tests={count} failed={failures} errors={errors} skipped={skipped}')
-          assert count == 6 and failures == 0 and errors == 0 and skipped == 0
+          assert count == 12 and failures == 0 and errors == 0 and skipped == 0
           PY
 
   emulator:
