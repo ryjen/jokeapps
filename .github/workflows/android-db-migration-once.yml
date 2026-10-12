@@ -1,0 +1,92 @@
+name: JokeApps database migration qualification (one-shot)
+
+on:
+  push:
+    branches: [fix/android-joke-unique-upsert-migration-20261012]
+    paths: [.github/workflows/android-db-migration-once.yml]
+
+permissions:
+  contents: read
+concurrency:
+  group: jokeapps-db-migration-20261012
+  cancel-in-progress: false
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Offline SQLite migration preflight
+        run: |
+          python3 - <<'PY'
+          import sqlite3
+          from pathlib import Path
+          f = Path('apps/android/data/src/main/sqldelight/migrations/1.sqm')
+          migration = f.read_text()
+          db = sqlite3.connect(':memory:')
+          db.executescript("""
+          CREATE TABLE joke(id INTEGER PRIMARY KEY,key TEXT NOT NULL,content TEXT NOT NULL,created TEXT,isFavorite INTEGER NOT NULL DEFAULT 0);
+          CREATE INDEX joke_key ON joke(key);
+          INSERT INTO joke(id,key,content,created,isFavorite) VALUES(1,'dup','old','2020',1),(2,'dup','new','2022',0),(3,'solo','single','2023',1);
+          """)
+          db.executescript(migration)
+          records = db.execute('SELECT key,content,created,isFavorite FROM joke ORDER BY key').fetchall()
+          assert records == [('dup','new','2022',1),('solo','single','2023',1)], records
+          try:
+              db.execute("INSERT INTO joke(key,content,isFavorite) VALUES('dup','bad',0)")
+              raise AssertionError('Unique key did not reject second record')
+          except sqlite3.IntegrityError:
+              pass
+          print('SQLite v1->v2 dedup + favorite preservation + unique index PASS')
+          PY
+      - name: Provision SDK 31 and Linux KVM
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-31" "build-tools;31.0.0"
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          test -e /dev/kvm
+      - name: Android instrumentation with physical SQLite migration
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
+        with:
+          api-level: 31
+          arch: x86_64
+          target: google_apis
+          ram-size: 2048M
+          emulator-boot-timeout: 420
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -no-metrics
+          script: |
+            (cd apps/android && ./gradlew --no-daemon --console=plain :app:connectedDebugAndroidTest --stacktrace) || rc=$?
+            adb logcat -d -s AndroidRuntime:E TestRunner:E Instrumentation:E | tail -n 110 || true
+            exit "${rc:-0}"
+      - name: Assert migration, concurrency and all baseline tests
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+          files = list(Path('apps/android/app/build').rglob('TEST*.xml'))
+          tests = failures = errors = skipped = 0
+          for f in files:
+              root = ET.parse(f).getroot()
+              for suite in ([root] if root.tag == 'testsuite' else root.iter('testsuite')):
+                  tests += int(suite.attrib.get('tests', 0))
+                  failures += int(suite.attrib.get('failures', 0))
+                  errors += int(suite.attrib.get('errors', 0))
+                  skipped += int(suite.attrib.get('skipped', 0))
+          print(f'Android instrumentation JUnit files={len(files)} tests={tests} failures={failures} errors={errors} skipped={skipped}')
+          assert tests >= 26, 'Expected 24 prior tests plus schema upgrade and concurrent write tests'
+          assert failures == 0 and errors == 0 and skipped == 0
+          PY
+      - name: Unit tests lint and debug/unsigned release packaging
+        working-directory: apps/android
+        run: ./gradlew --no-daemon --console=plain test lint :app:assembleDebug :app:assembleRelease --stacktrace
