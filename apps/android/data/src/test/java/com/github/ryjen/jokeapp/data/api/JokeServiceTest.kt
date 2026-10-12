@@ -23,7 +23,8 @@ class JokeServiceTest {
             calls++
             assertEquals("https", request.url.protocol.name)
             assertEquals("icanhazdadjoke.com", request.url.host)
-            assertEquals("/", request.url.encodedPath)
+            // Ktor MockEngine may represent an origin request with an empty path or "/".
+            assertTrue(request.url.encodedPath.isEmpty() || request.url.encodedPath == "/")
             assertEquals("application/json", request.headers[HttpHeaders.Accept])
             assertTrue(request.headers[HttpHeaders.UserAgent].orEmpty().contains("JokeApps/1.0"))
             respond(good, headers = json)

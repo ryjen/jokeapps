@@ -1,5 +1,5 @@
 # Ephemeral qualification for issue #17; never merge this file.
-# Ktor 2.0.1 path-encoding compatibility correction after run #38322045516.
+# Accept equivalent origin-path representations in Ktor 2.0.1 MockEngine.
 name: JokeApps HTTPS API qualification (one-shot)
 
 on:
