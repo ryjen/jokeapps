@@ -1,4 +1,4 @@
-# Attempt 3: correct JUnit rule metadata and screen-level UI contracts.
+# Attempt 4: remove incorrect ComposeTest 1.1.1 top-level import.
 name: JokeApps app instrumentation qualification (one-shot)
 on:
   push:
