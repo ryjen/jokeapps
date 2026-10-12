@@ -81,6 +81,16 @@ The Android project declares Gradle 7.4, AGP 7.3.1, Kotlin 1.6.10 and SDK 31. Re
 - **Atomic writes:** favorite creation inserts or ignores by the unique external key, then updates the favorite bit in one database transaction. Repeated stale cache inserts cannot reset an existing favorite.
 - **Not covered:** signed releases, production rollout/rollback procedures, alternative Android database versions, iOS native builds, or repeated independent emulator runs. No permanent automatic hosted CI was enabled.
 
+## Verified HTTPS joke API request qualification — October 12, 2026 (Pacific)
+
+[GitHub Actions run #38323123441](https://github.com/ryjen/jokeapps/actions/runs/38323123441) **passed** on source commit `3b790f0c9efa64b507c9e67bc6ad0563397eab68`. The verification workflow is branch/path-scoped and disposable; it is removed before merge with no application or test-source changes.
+
+- **Ktor 2.0.1 MockEngine unit tests:** the same client configuration used in production was tested in both debug and release: **12 results (6 distinct tests per variant), 0 failures, 0 errors, 0 skipped**; Gradle `BUILD SUCCESSFUL in 1m 32s`. Covers HTTPS origin, JSON `Accept` and descriptive `User-Agent`, percent-encoded joke IDs (including `/`, `?`, `#`), no request for blank ID, HTTP/JSON errors and malformed bodies, disabled redirects to HTTP, and coroutine cancellation.
+- **Android API 31 emulator:** `:app:connectedDebugAndroidTest` **PASS**, JUnit **26 tests, 0 failures, 0 errors, 0 skipped**, Gradle `BUILD SUCCESSFUL in 4m 30s`.
+- **Full unit/lint/APK gates:** [run #38322611755](https://github.com/ryjen/jokeapps/actions/runs/38322611755) executed `test lint :app:assembleDebug :app:assembleRelease` with `BUILD SUCCESSFUL in 4m 45s` on the **same application/test sources**; its overall workflow was marked failed **only** because a custom post-check incorrectly expected 6 MockEngine test results rather than the 12 debug+release results that all passed. That reporting check was corrected in the successful run above. The release APK is **unsigned**.
+- **Implementation:** TLS-only base URL `https://icanhazdadjoke.com`, encoded single path segments compatible with Ktor 2.0.1, strict HTTP 200 and application JSON payload checks, no redirect following or verbose HTTP body logging, and propagation of coroutine cancellation.
+- **Not qualified:** end-to-end communication with the live third-party provider from an installed Android app, provider availability, current target SDK/Play distribution, production signing, iOS build, and repeated independent emulator qualification. The documented provider API contract is verified by mock fixtures, not live network integration.
+
 ## Acceptance
 
 Capture tool versions, commands, runner identity, commit SHA and exit statuses. All three original source repositories were verified private and archived on October 12, 2026. Keep them as read-only historical references; deletion is a separate decision requiring independent private backups, repository metadata/link impact review, and explicit authorization.
