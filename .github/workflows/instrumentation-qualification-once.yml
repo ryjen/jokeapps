@@ -1,4 +1,4 @@
-# Attempt 2: use an instrumented TestApplication instead of KoinTestRule.
+# Attempt 3: correct JUnit rule metadata and screen-level UI contracts.
 name: JokeApps app instrumentation qualification (one-shot)
 on:
   push:

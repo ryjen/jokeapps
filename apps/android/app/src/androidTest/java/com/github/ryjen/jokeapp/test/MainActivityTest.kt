@@ -2,7 +2,7 @@ package com.github.ryjen.jokeapp.test
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import com.github.ryjen.jokeapp.MainActivity
@@ -35,8 +35,8 @@ class MainActivityTest : KoinTest {
                 MainScreen()
             }
         }
-        composeTestRule.onNodeWithTag("favorites").performClick()
+        composeTestRule.onNodeWithText("FAVOURITES").performClick()
 
-        composeTestRule.onNodeWithTag("favoritesList").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Favourites").assertIsDisplayed()
     }
 }

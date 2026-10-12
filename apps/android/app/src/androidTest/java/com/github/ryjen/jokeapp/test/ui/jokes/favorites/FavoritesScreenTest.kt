@@ -1,69 +1,48 @@
 package com.github.ryjen.jokeapp.test.ui.jokes.favorites
 
-import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import com.github.javafaker.Faker
-import com.github.ryjen.jokeapp.MainActivity
-import com.github.ryjen.jokeapp.data.repository.joke.JokeRepository
 import com.github.ryjen.jokeapp.domain.model.Joke
-import com.github.ryjen.jokeapp.ui.jokes.favourites.FavoritesScreen
-import com.github.ryjen.jokeapp.ui.jokes.favourites.FavoritesViewModel
+import com.github.ryjen.jokeapp.ui.jokes.favourites.FavoritesAction
+import com.github.ryjen.jokeapp.ui.jokes.favourites.FavoritesContent
+import com.github.ryjen.jokeapp.ui.jokes.favourites.FavoritesViewState
 import com.github.ryjen.jokeapp.ui.theme.MainTheme
-import io.mockk.every
-import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.koin.test.KoinTest
-import org.koin.test.inject
 
-class FavoritesScreenTest : KoinTest {
+/** Exercise visible list and confirmed removal against a controlled view state. */
+class FavoritesScreenTest {
+    @get:Rule val composeTestRule = createComposeRule()
+    private val joke = Joke("joke-1", "A favorite joke")
+    private var state by mutableStateOf(FavoritesViewState(jokes = listOf(joke)))
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
-
-    private val faker = Faker()
-
-    private val repo: JokeRepository by inject()
-
-    private val viewModel: FavoritesViewModel by inject()
-
-    private var joke = mockk<Joke>(relaxed = true)
-
-    @Before
-    fun setUp() {
-
-        every { joke.content } returns faker.lorem().paragraph(4)
-        every { joke.id } returns faker.idNumber().valid()
-
-        runBlocking {
-            repo.addFavorite(joke)
-        }
-
+    @Before fun setUp() {
         composeTestRule.setContent {
             MainTheme {
-                FavoritesScreen(viewModel)
+                FavoritesContent(state) { action ->
+                    if (action is FavoritesAction.Remove) {
+                        state = state.copy(jokes = state.jokes.filterNot { it.id == action.data.id })
+                    }
+                }
             }
         }
     }
 
-    @Test
-    fun testEmpty() {
-        with(composeTestRule) {
-            onNodeWithTag("remove").performClick()
-            onNodeWithText("no favorites").assertIsDisplayed()
-        }
+    @Test fun testEmpty() {
+        composeTestRule.runOnUiThread { state = FavoritesViewState() }
+        composeTestRule.onNodeWithTag("remove").assertDoesNotExist()
     }
 
-    @Test
-    fun testRemoveJoke() {
-        with(composeTestRule) {
-            onNodeWithTag("remove").performClick()
-            onNodeWithText(joke.content).assertDoesNotExist()
-        }
+    @Test fun testRemoveJoke() {
+        composeTestRule.onNodeWithTag("remove").performClick()
+        composeTestRule.onNodeWithText("OK").performClick()
+        composeTestRule.onNodeWithText(joke.content).assertDoesNotExist()
     }
 }

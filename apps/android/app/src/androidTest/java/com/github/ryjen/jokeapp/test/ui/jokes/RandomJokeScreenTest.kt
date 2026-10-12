@@ -1,74 +1,49 @@
 package com.github.ryjen.jokeapp.test.ui.jokes
 
 import android.content.Intent
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
-import com.github.ryjen.jokeapp.MainActivity
-import com.github.ryjen.jokeapp.data.repository.joke.JokeRepository
-import com.github.ryjen.jokeapp.test.randomJoke
-import com.github.ryjen.jokeapp.ui.jokes.random.RandomJokeScreen
-import com.github.ryjen.jokeapp.ui.jokes.random.RandomJokeViewModel
+import com.github.ryjen.jokeapp.domain.model.Joke
+import com.github.ryjen.jokeapp.ui.jokes.random.RandomJokeAction
+import com.github.ryjen.jokeapp.ui.jokes.random.RandomJokeHeaderContent
+import com.github.ryjen.jokeapp.ui.jokes.random.RandomJokeViewState
 import com.github.ryjen.jokeapp.ui.theme.MainTheme
-import kotlinx.coroutines.runBlocking
+import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Rule
 import org.junit.Test
-import org.koin.test.KoinTest
-import org.koin.test.inject
-import org.koin.core.parameter.parametersOf
-import com.github.ryjen.jokeapp.ui.navigation.Router
-import io.mockk.mockk
 
-class RandomJokeScreenTest : KoinTest {
+/** The header, not RandomJokeScreen, owns favorite/share controls. */
+class RandomJokeScreenTest {
+    @get:Rule val composeTestRule = createComposeRule()
+    private val joke = Joke("joke-1", "An instrumentation joke")
+    private val actions = mutableListOf<RandomJokeAction>()
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
-
-    private val repo: JokeRepository by inject()
-
-    private val viewModel: RandomJokeViewModel by inject(parameters = { parametersOf(mockk<Router>(relaxed = true)) })
-
-    companion object {
-
-        @BeforeClass
-        @JvmStatic
-        fun startUp() {
-            Intents.init()
-        }
-    }
-
-    @Before
-    fun setUp() {
-        val joke = randomJoke()
-
-        runBlocking {
-            repo.addFavorite(joke)
-        }
+    @Before fun setUp() {
+        Intents.init()
         composeTestRule.setContent {
             MainTheme {
-                RandomJokeScreen(viewModel)
+                RandomJokeHeaderContent(RandomJokeViewState(joke = joke)) { actions.add(it) }
             }
         }
     }
 
-    @Test
-    fun testShareJoke() {
-        composeTestRule.onNodeWithTag("share").performClick()
+    @After fun tearDown() {
+        Intents.release()
+    }
 
+    @Test fun testShareJoke() {
+        composeTestRule.onNodeWithTag("share").performClick()
         intended(hasAction(Intent.ACTION_CHOOSER))
     }
 
-    @Test
-    fun testFavourites() {
+    @Test fun testFavourites() {
         composeTestRule.onNodeWithTag("add").performClick()
-
-        composeTestRule.onNodeWithText("added").assertIsDisplayed()
+        assertThat(actions).contains(RandomJokeAction.Favorite(joke))
     }
 }

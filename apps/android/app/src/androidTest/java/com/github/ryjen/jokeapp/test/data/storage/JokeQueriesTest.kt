@@ -5,7 +5,6 @@ import com.github.ryjen.jokeapp.data.storage.JokeDatabase
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import org.junit.Test
 import org.koin.test.KoinTest
 import org.koin.test.inject
@@ -13,7 +12,6 @@ import org.koin.test.inject
 @ExperimentalCoroutinesApi
 class JokeDaoTest : KoinTest {
 
-    @get:Rule
     private val db: JokeDatabase by inject()
 
     @Test

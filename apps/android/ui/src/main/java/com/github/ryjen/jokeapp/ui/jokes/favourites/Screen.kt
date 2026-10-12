@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.github.ryjen.jokeapp.domain.model.Joke
@@ -84,7 +85,8 @@ fun FavoritesContent(state: FavoritesViewState, onAction: (FavoritesAction) -> U
 
                     IconButton(
                         modifier = Modifier
-                            .size(ThemeDimensions.icons.small),
+                            .size(ThemeDimensions.icons.small)
+                            .testTag("remove"),
                         onClick = {
                             setDeleteConfirm(joke)
                         }) {

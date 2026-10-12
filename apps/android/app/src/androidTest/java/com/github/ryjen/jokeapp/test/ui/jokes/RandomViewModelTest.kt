@@ -1,6 +1,6 @@
 package com.github.ryjen.jokeapp.test.ui.jokes
 
-import com.github.ryjen.jokeapp.data.repository.joke.JokeRepository
+import com.github.ryjen.jokeapp.domain.repository.joke.JokeRepository
 import com.github.ryjen.jokeapp.domain.model.Joke
 import com.github.ryjen.jokeapp.test.randomJoke
 import com.github.ryjen.jokeapp.ui.jokes.random.RandomJokeAction
@@ -9,7 +9,6 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.koin.test.KoinTest
 import org.koin.test.inject
@@ -20,7 +19,6 @@ import io.mockk.mockk
 @ExperimentalCoroutinesApi
 class RandomViewModelTest : KoinTest {
 
-    @get:Rule
     private val viewModel: RandomJokeViewModel by inject(parameters = { parametersOf(mockk<Router>(relaxed = true)) })
 
     private val repo: JokeRepository by inject()

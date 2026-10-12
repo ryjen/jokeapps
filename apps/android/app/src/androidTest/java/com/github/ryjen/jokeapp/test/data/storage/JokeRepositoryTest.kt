@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.koin.test.KoinTest
 import org.koin.test.inject
@@ -19,7 +18,6 @@ import org.koin.test.inject
 @ExperimentalCoroutinesApi
 class JokeRepositoryTest : KoinTest {
 
-    @get:Rule
     private val repo: JokeRepository by inject()
     private val data = FakeJokeData()
 
