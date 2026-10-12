@@ -12,9 +12,14 @@ android {
         applicationId = "com.github.ryjen.jokeapp"
         minSdk = Versions.Sdk.Min
         targetSdk = Versions.Sdk.Target
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         versionCode = 1
         versionName = "1.0"
         vectorDrawables.useSupportLibrary = true
+    }
+
+    testOptions {
+        animationsDisabled = true
     }
 
     buildFeatures {
@@ -97,5 +102,16 @@ dependencies {
     implementation(Dependencies.Koin.Android)
 
     androidTestImplementation(project(":test"))
+    androidTestImplementation(Dependencies.JUnit)
+    androidTestImplementation(Dependencies.Fake)
+    androidTestImplementation(Dependencies.CoroutinesX.Test)
+    androidTestImplementation(Dependencies.Koin.Android)
+    androidTestImplementation(Dependencies.Koin.JUnit)
+    androidTestImplementation(Dependencies.Koin.Test)
+    androidTestImplementation(Dependencies.Mockk.Android)
+    androidTestImplementation(Dependencies.ComposeX.Test)
+    androidTestImplementation(Dependencies.Espresso.Intents)
+    androidTestImplementation(Dependencies.Truth)
+    androidTestImplementation(Dependencies.SqlDelight.Test)
     testImplementation(project(":test"))
 }

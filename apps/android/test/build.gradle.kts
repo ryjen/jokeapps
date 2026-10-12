@@ -29,7 +29,6 @@ dependencies {
     implementation(project(":data"))
     implementation(project(":meta"))
     implementation(project(":ui"))
-    implementation(project(":app"))
 
     testImplementation(Dependencies.JUnit)
     testImplementation(Dependencies.Truth)
