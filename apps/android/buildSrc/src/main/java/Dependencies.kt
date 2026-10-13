@@ -102,7 +102,8 @@ object Dependencies {
     }
 
     object ComposeX {
-        private const val version = "1.1.1"
+        // Compose 1.9+ lint rules use modern Kotlin/AGP UAST services.
+        private const val version = "1.9.5"
         const val Ui = "androidx.compose.ui:ui:$version"
         const val Graphics = "androidx.compose.ui:ui-graphics:$version"
         const val Foundation = "androidx.compose.foundation:foundation-layout:$version"

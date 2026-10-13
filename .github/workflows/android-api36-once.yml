@@ -1,4 +1,4 @@
-# Temporary branch/path-scoped qualification; delete before main merge.
+# Stage 6: upgrade legacy Compose 1.1 lint rules to compatible Compose 1.9.5.
 name: JokeApps API36 full qualification (one-shot)
 on:
   push:
