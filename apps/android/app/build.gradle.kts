@@ -1,4 +1,4 @@
-import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import java.util.Properties
 
 plugins {
     id("com.android.application")
@@ -34,7 +34,11 @@ android {
     }
 
     signingConfigs {
-        val props = gradleLocalProperties(rootDir)
+        // Avoid AGP-internal APIs. Local signing material is optional and never checked in.
+        val props = Properties().apply {
+            val localConfig = rootProject.file("local.properties")
+            if (localConfig.isFile) localConfig.inputStream().use { load(it) }
+        }
         props.getProperty("signing.debug.file")?.let { keystore: String ->
             getByName("debug") {
                 storeFile = file(keystore)

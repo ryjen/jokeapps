@@ -1,4 +1,4 @@
-# Temporary, branch-only compatibility probe. Never merge into main.
+# Stage 2: remove unsupported AGP internal signing helper; no signing data in CI.
 name: JokeApps API36 toolchain qualification (one-shot)
 on:
   push:
