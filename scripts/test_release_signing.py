@@ -37,6 +37,16 @@ class ReleaseSigningTests(unittest.TestCase):
             ["release uses an embedded signing configuration"],
         )
 
+    def test_inherited_debug_signing_is_blocked(self):
+        for value in ("initWith debug", "setSigningConfig(signingConfigs.debug)",
+                      "signingConfig = signingConfigs.debug",
+                      "initWith getByName('debug')"):
+            with self.subTest(value=value):
+                self.assertEqual(
+                    guard.verify(sample(value)),
+                    ["release uses an embedded signing configuration"],
+                )
+
     def test_missing_build_contract_fails_closed(self):
         self.assertTrue(guard.verify("android {}"))
 
