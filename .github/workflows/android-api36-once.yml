@@ -1,20 +1,17 @@
-# Stage 5: preserve domain Unit contract across SQLDelight 2 write API.
-name: JokeApps API36 toolchain qualification (one-shot)
+# Temporary branch/path-scoped qualification; delete before main merge.
+name: JokeApps API36 full qualification (one-shot)
 on:
   push:
     branches: [fix/android-api36-toolchain-20261012]
     paths: [.github/workflows/android-api36-once.yml]
-
 permissions:
   contents: read
-
 concurrency:
   group: jokeapps-api36-compat-20261012
   cancel-in-progress: false
-
 jobs:
-  build:
-    name: AGP and API36 build compatibility
+  static:
+    name: Unit, lint, debug/unsigned release APK
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -25,16 +22,91 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Install Android API36 SDK
+      - name: Install SDK 36 and build tools
         run: |
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;35.0.0"
-      - name: Build debug APK with upgraded compiler
+      - name: Unit, lint, build variants
         working-directory: apps/android
-        run: ./gradlew --no-daemon --console=plain :app:assembleDebug --stacktrace
-      - name: Check APK target SDK
+        run: ./gradlew --no-daemon --console=plain test lint :app:assembleDebug :app:assembleRelease --stacktrace
+      - name: Check packaged manifest and data tests
         run: |
           apk=$(find apps/android/app/build/outputs/apk/debug -name '*.apk' -print -quit)
           test -n "$apk"
-          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$apk" | grep -E "targetSdkVersion:'36'|sdkVersion:"
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$apk" | grep -q "targetSdkVersion:'36'"
+          python3 - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          suites = []
+          for f in Path('apps/android/data/build').rglob('TEST*.xml'):
+              root = ET.parse(f).getroot()
+              suites += [s for s in ([root] if root.tag == 'testsuite' else root.iter('testsuite')) if s.attrib.get('name', '').endswith('JokeServiceTest')]
+          tests = sum(int(s.get('tests', 0)) for s in suites)
+          bad = sum(int(s.get(k,0)) for s in suites for k in ('failures','errors','skipped'))
+          print(f'JokeServiceTest: {tests} results, {bad} failures/errors/skips')
+          assert tests == 12 and bad == 0
+          PY
+  emulator:
+    name: API ${{ matrix.api }} database and UI tests
+    needs: static
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        api: [31, 36]
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          test -e /dev/kvm
+      - name: Execute instrumented tests and smoke-launch app
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
+        with:
+          api-level: ${{ matrix.api }}
+          arch: x86_64
+          target: google_apis
+          ram-size: 2048M
+          emulator-boot-timeout: 420
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -no-metrics
+          script: |
+            (cd apps/android && ./gradlew --no-daemon --console=plain :app:connectedDebugAndroidTest --stacktrace) || rc=$?
+            if [ -n "${rc:-}" ]; then adb logcat -d -s AndroidRuntime:E TestRunner:E | tail -n 100 || true; exit "$rc"; fi
+            adb logcat -c || true
+            adb shell am force-stop com.github.ryjen.jokeapp || true
+            adb shell am start -W -n com.github.ryjen.jokeapp/.MainActivity
+            sleep 3
+            adb shell pidof com.github.ryjen.jokeapp | grep -E '[0-9]+'
+            test -z "$(adb logcat -d -s AndroidRuntime:E | grep 'FATAL EXCEPTION' || true)"
+      - name: Gate on full old-db upgrade and instrumentation suite
+        if: always()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          files = list(Path('apps/android/app/build').rglob('TEST*.xml'))
+          tests = failures = errors = skipped = 0
+          names = []
+          for f in files:
+              root = ET.parse(f).getroot()
+              for suite in ([root] if root.tag == 'testsuite' else root.iter('testsuite')):
+                  tests += int(suite.get('tests',0))
+                  failures += int(suite.get('failures',0))
+                  errors += int(suite.get('errors',0))
+                  skipped += int(suite.get('skipped',0))
+                  names.append(suite.get('name',''))
+          print(f'instrumented: {tests} tests; {failures} failures; {errors} errors; {skipped} skipped')
+          assert tests >= 26 and failures == errors == skipped == 0
+          assert any('JokeMigrationAndUpsertTest' in name for name in names)
+          PY
