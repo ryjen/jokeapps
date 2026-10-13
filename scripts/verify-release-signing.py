@@ -35,7 +35,7 @@ def verify(source: str) -> list[str]:
         return ["missing Android debug/release signing contract"]
     # A release package must not be signed with ANY hardcoded config in this
     # public example. A future private distribution contract needs review.
-    if re.search(r"(?m)^\s*signingConfig\b", release):
+    if re.search(r"\b(?:signingConfig|setSigningConfig|initWith)\b", release):
         errors.append("release uses an embedded signing configuration")
     if not re.search(r"(?m)^\s*signingConfig\s+signingConfigs\.debug\s*$", debug):
         errors.append("debug build configuration changed")
