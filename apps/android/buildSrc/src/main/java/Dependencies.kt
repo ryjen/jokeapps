@@ -108,6 +108,8 @@ object Dependencies {
         const val Graphics = "androidx.compose.ui:ui-graphics:$version"
         const val Foundation = "androidx.compose.foundation:foundation-layout:$version"
         const val Material = "androidx.compose.material:material:$version"
+        // Material Icons core is no longer transitively bundled with modern Compose Material.
+        const val MaterialIcons = "androidx.compose.material:material-icons-core:1.7.8"
         const val Animation = "androidx.compose.animation:animation:$version"
         const val Tooling = "androidx.compose.ui:ui-tooling:$version"
         const val Test = "androidx.compose.ui:ui-test-junit4:$version"

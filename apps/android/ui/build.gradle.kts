@@ -33,6 +33,7 @@ dependencies {
     implementation(Dependencies.ComposeX.Tooling)
     implementation(Dependencies.ComposeX.Foundation)
     implementation(Dependencies.ComposeX.Material)
+    implementation(Dependencies.ComposeX.MaterialIcons)
 
     implementation(Dependencies.NavigationX.Compose)
     implementation(Dependencies.Koin.Android)
