@@ -1,4 +1,4 @@
-# Stage 3: coordinated Kotlin 2.2 Compose plugin and SQLDelight 2.1 migrations.
+# Stage 4: explicit Java/Kotlin 11 bytecode alignment on every Android module.
 name: JokeApps API36 toolchain qualification (one-shot)
 on:
   push:
