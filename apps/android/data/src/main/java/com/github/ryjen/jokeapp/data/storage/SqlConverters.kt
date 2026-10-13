@@ -1,6 +1,6 @@
 package com.github.ryjen.jokeapp.data.storage
 
-import com.squareup.sqldelight.ColumnAdapter
+import app.cash.sqldelight.ColumnAdapter
 import java.text.SimpleDateFormat
 import java.util.*
 

@@ -1,4 +1,5 @@
 plugins {
+    id("org.jetbrains.kotlin.plugin.compose")
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
 }
@@ -14,9 +15,6 @@ android {
         compose = true
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = Versions.ComposeX.Compiler
-    }
     namespace = "com.github.ryjen.jokeapp.ui"
 }
 

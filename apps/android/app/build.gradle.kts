@@ -1,6 +1,7 @@
 import java.util.Properties
 
 plugins {
+    id("org.jetbrains.kotlin.plugin.compose")
     id("com.android.application")
     id("kotlin-android")
 }
@@ -78,9 +79,6 @@ android {
         }
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = Versions.ComposeX.Compiler
-    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

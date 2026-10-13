@@ -1,4 +1,4 @@
-# Stage 2: remove unsupported AGP internal signing helper; no signing data in CI.
+# Stage 3: coordinated Kotlin 2.2 Compose plugin and SQLDelight 2.1 migrations.
 name: JokeApps API36 toolchain qualification (one-shot)
 on:
   push:

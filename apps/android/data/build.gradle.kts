@@ -2,12 +2,14 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization")
-    id("com.squareup.sqldelight")
+    id("app.cash.sqldelight")
 }
 
 sqldelight {
-    database("JokeDatabase") {
-        packageName = "com.github.ryjen.jokeapp.data.storage"
+    databases {
+        create("JokeDatabase") {
+            packageName.set("com.github.ryjen.jokeapp.data.storage")
+        }
     }
 }
 
