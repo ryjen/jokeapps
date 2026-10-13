@@ -14,7 +14,7 @@ def sample(release: str) -> str:
         "android {\n"
         "  signingConfigs { debug { storeFile file('debug.keystore') } }\n"
         "  buildTypes {\n"
-        "    debug { signingConfig signingConfigs.debug }\n"
+        "    debug {\n      signingConfig signingConfigs.debug\n    }\n"
         f"    release {{\n{release}\n      minifyEnabled false\n    }}\n"
         "  }\n"
         "}\n"
