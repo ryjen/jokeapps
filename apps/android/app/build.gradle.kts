@@ -87,7 +87,7 @@ android {
         jvmTarget = "11"
     }
 
-    buildToolsVersion = "31.0.0"
+    // AGP 8.11 chooses a supported SDK Build Tools version.
     namespace = "com.github.ryjen.jokeapp"
 }
 

@@ -1,20 +1,20 @@
 object Versions {
     object Sdk {
-        const val Compile = 31
+        const val Compile = 36
         const val Min = 21
-        const val Target = 30
+        const val Target = 36
     }
 
     object ComposeX {
-        const val Compiler = "1.1.1"
+        const val Compiler = "1.5.15"
     }
 
     object Kotlin {
-        const val version = "1.6.10"
+        const val version = "1.9.25"
     }
 
     object Gradle {
-        const val version = "7.3.1"
+        const val version = "8.11.2"
     }
 }
 
@@ -29,7 +29,7 @@ object Dependencies {
     }
 
     object Kotlin {
-        private const val version = "1.6.21"
+        private const val version = "1.9.25"
         const val Test = "org.jetbrains.kotlin:kotlin-test-junit:$version"
     }
 

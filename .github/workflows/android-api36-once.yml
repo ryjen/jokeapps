@@ -1,0 +1,40 @@
+# Temporary, branch-only compatibility probe. Never merge into main.
+name: JokeApps API36 toolchain qualification (one-shot)
+on:
+  push:
+    branches: [fix/android-api36-toolchain-20261012]
+    paths: [.github/workflows/android-api36-once.yml]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jokeapps-api36-compat-20261012
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: AGP and API36 build compatibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install Android API36 SDK
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;35.0.0"
+      - name: Build debug APK with upgraded compiler
+        working-directory: apps/android
+        run: ./gradlew --no-daemon --console=plain :app:assembleDebug --stacktrace
+      - name: Check APK target SDK
+        run: |
+          apk=$(find apps/android/app/build/outputs/apk/debug -name '*.apk' -print -quit)
+          test -n "$apk"
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$apk" | grep -E "targetSdkVersion:'36'|sdkVersion:"
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$apk" | grep -q "targetSdkVersion:'36'"
