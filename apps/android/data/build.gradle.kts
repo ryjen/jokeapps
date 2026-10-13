@@ -47,7 +47,6 @@ dependencies {
     implementation(Dependencies.Ktor.Json)
     implementation(Dependencies.Ktor.Logging)
     implementation(Dependencies.Ktor.Serialize)
-    implementation(Dependencies.Ktor.Logback)
     implementation(Dependencies.Serialization.Json)
 
     implementation(Dependencies.Timber)

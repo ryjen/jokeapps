@@ -1,4 +1,4 @@
-# Stage 7: explicitly provide Material Icons core alongside Compose 1.9.5.
+# Stage 8: remove server-only Logback servlet integration from Android runtime.
 name: JokeApps API36 full qualification (one-shot)
 on:
   push:
