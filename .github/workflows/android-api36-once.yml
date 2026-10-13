@@ -1,4 +1,4 @@
-# Stage 4: explicit Java/Kotlin 11 bytecode alignment on every Android module.
+# Stage 5: preserve domain Unit contract across SQLDelight 2 write API.
 name: JokeApps API36 toolchain qualification (one-shot)
 on:
   push:
