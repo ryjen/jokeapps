@@ -66,3 +66,9 @@ a small app to request a joke from [iCanHazDadJoke](https://icanhazdadjoke.com)
 - [ ] Animations
 - [ ] Monetize user customizations
 - [ ] security analysis
+
+## Android signing boundary
+
+The tracked `android/app/debug.keystore` is a public Android development fixture, **not** a production signing identity. Debug builds continue to use it. The React Native `release` build type intentionally has **no signingConfig**: it generates an unsigned artifact until an operator supplies a privately managed release identity and reviews the CI/distribution process. Never use `signingConfigs.debug` for production or share a release keystore in source control. The root `make verify` and manual qualification workflow enforce that rule with a focused regression test.
+
+This protects future releases; it cannot establish whether an older debug-signed build was distributed. If any public app was previously distributed with the debug key, identify its package IDs and plan a supported app-signing migration before attempting updates.
