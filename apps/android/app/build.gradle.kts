@@ -1,6 +1,7 @@
-import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import java.util.Properties
 
 plugins {
+    id("org.jetbrains.kotlin.plugin.compose")
     id("com.android.application")
     id("kotlin-android")
 }
@@ -34,7 +35,11 @@ android {
     }
 
     signingConfigs {
-        val props = gradleLocalProperties(rootDir)
+        // Avoid AGP-internal APIs. Local signing material is optional and never checked in.
+        val props = Properties().apply {
+            val localConfig = rootProject.file("local.properties")
+            if (localConfig.isFile) localConfig.inputStream().use { load(it) }
+        }
         props.getProperty("signing.debug.file")?.let { keystore: String ->
             getByName("debug") {
                 storeFile = file(keystore)
@@ -74,9 +79,6 @@ android {
         }
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = Versions.ComposeX.Compiler
-    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -87,7 +89,7 @@ android {
         jvmTarget = "11"
     }
 
-    buildToolsVersion = "31.0.0"
+    // AGP 8.11 chooses a supported SDK Build Tools version.
     namespace = "com.github.ryjen.jokeapp"
 }
 

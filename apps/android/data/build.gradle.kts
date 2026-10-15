@@ -2,12 +2,14 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization")
-    id("com.squareup.sqldelight")
+    id("app.cash.sqldelight")
 }
 
 sqldelight {
-    database("JokeDatabase") {
-        packageName = "com.github.ryjen.jokeapp.data.storage"
+    databases {
+        create("JokeDatabase") {
+            packageName.set("com.github.ryjen.jokeapp.data.storage")
+        }
     }
 }
 
@@ -18,6 +20,14 @@ android {
         minSdk = Versions.Sdk.Min
     }
     namespace = "com.github.ryjen.jokeapp.data"
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 }
 
 dependencies {
@@ -37,7 +47,6 @@ dependencies {
     implementation(Dependencies.Ktor.Json)
     implementation(Dependencies.Ktor.Logging)
     implementation(Dependencies.Ktor.Serialize)
-    implementation(Dependencies.Ktor.Logback)
     implementation(Dependencies.Serialization.Json)
 
     implementation(Dependencies.Timber)

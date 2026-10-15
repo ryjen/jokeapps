@@ -7,7 +7,7 @@ import com.github.ryjen.jokeapp.data.storage.Joke
 import com.github.ryjen.jokeapp.data.storage.JokeDatabase
 import com.github.ryjen.jokeapp.data.storage.JokeDatabaseName
 import com.github.ryjen.jokeapp.data.storage.datesAdapter
-import com.squareup.sqldelight.android.AndroidSqliteDriver
+import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import org.koin.dsl.module
 import com.github.ryjen.jokeapp.domain.repository.joke.JokeRepository as DomainJokeRepository
 

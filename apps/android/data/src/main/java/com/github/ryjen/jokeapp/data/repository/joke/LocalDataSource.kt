@@ -2,9 +2,10 @@ package com.github.ryjen.jokeapp.data.repository.joke
 
 import com.github.ryjen.jokeapp.data.storage.Joke
 import com.github.ryjen.jokeapp.data.storage.JokeDatabase
-import com.squareup.sqldelight.runtime.coroutines.asFlow
+import app.cash.sqldelight.coroutines.asFlow
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import app.cash.sqldelight.coroutines.mapToList
+import kotlinx.coroutines.Dispatchers
 
 class LocalDataSource(
     private val db: JokeDatabase
@@ -12,7 +13,7 @@ class LocalDataSource(
     fun getJoke(id: String) = db.jokeQueries.get(id).executeAsOneOrNull()
 
     fun getFavoriteJokes(): Flow<List<Joke>> =
-        db.jokeQueries.favorites().asFlow().map { it.executeAsList() }
+        db.jokeQueries.favorites().asFlow().mapToList(Dispatchers.IO)
 
     fun deleteJoke(joke: Joke) = db.jokeQueries.delete(joke.key)
 

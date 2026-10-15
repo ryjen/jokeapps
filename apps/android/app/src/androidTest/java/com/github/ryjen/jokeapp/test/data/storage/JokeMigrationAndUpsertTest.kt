@@ -7,7 +7,7 @@ import com.github.ryjen.jokeapp.data.storage.Joke
 import com.github.ryjen.jokeapp.data.storage.JokeDatabase
 import com.github.ryjen.jokeapp.data.storage.datesAdapter
 import com.google.common.truth.Truth.assertThat
-import com.squareup.sqldelight.android.AndroidSqliteDriver
+import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -55,7 +55,7 @@ class JokeMigrationAndUpsertTest : KoinTest {
                 jokeAdapter = Joke.Adapter(createdAdapter = datesAdapter())
             )
             val records = upgraded.jokeQueries.list().executeAsList()
-            assertThat(JokeDatabase.Schema.version).isEqualTo(2)
+            assertThat(JokeDatabase.Schema.version).isEqualTo(2L)
             assertThat(records.count { it.key == "duplicate-key" }).isEqualTo(1)
             assertThat(records.size).isEqualTo(2)
             val retained = upgraded.jokeQueries.get("duplicate-key").executeAsOne()

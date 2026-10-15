@@ -50,13 +50,9 @@ class JokeRepository(
         localDataSource.addFavorite(map(joke.copy(isFavorite = true)))
     }
 
-    // update a local cached joke to longer be a favorite
-    override suspend fun removeFavorite(joke: DomainJoke) = try {
+    // Explicit Unit return isolates SQLDelight query-result changes from the domain contract.
+    override suspend fun removeFavorite(joke: DomainJoke) {
         localDataSource.updateFavorite(joke.id, false)
-        // remove from remote service
-    } catch (e: Throwable) {
-        Timber.e("error removing joke", e)
-        throw e
     }
 
     // save a local cache of a joke

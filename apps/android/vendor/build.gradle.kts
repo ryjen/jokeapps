@@ -1,4 +1,5 @@
 plugins {
+    id("org.jetbrains.kotlin.plugin.compose")
     id ("com.android.library")
     id ("kotlin-android")
 }
@@ -13,10 +14,15 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = Versions.ComposeX.Compiler
-    }
     namespace = "com.smarttoolfactory.speechbubble"
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 }
 
 dependencies {

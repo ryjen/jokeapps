@@ -1,20 +1,16 @@
 object Versions {
     object Sdk {
-        const val Compile = 31
+        const val Compile = 36
         const val Min = 21
-        const val Target = 30
-    }
-
-    object ComposeX {
-        const val Compiler = "1.1.1"
+        const val Target = 36
     }
 
     object Kotlin {
-        const val version = "1.6.10"
+        const val version = "2.2.21"
     }
 
     object Gradle {
-        const val version = "7.3.1"
+        const val version = "8.11.2"
     }
 }
 
@@ -25,11 +21,12 @@ object Dependencies {
         const val Android = "com.android.tools.build:gradle:${Versions.Gradle.version}"
         const val Serialization =
             "org.jetbrains.kotlin:kotlin-serialization:${Versions.Kotlin.version}"
-        const val SqlDelight = "com.squareup.sqldelight:gradle-plugin:1.5.3"
+        const val ComposeCompiler = "org.jetbrains.kotlin:compose-compiler-gradle-plugin:${Versions.Kotlin.version}"
+        const val SqlDelight = "app.cash.sqldelight:gradle-plugin:2.1.0"
     }
 
     object Kotlin {
-        private const val version = "1.6.21"
+        private const val version = "2.2.21"
         const val Test = "org.jetbrains.kotlin:kotlin-test-junit:$version"
     }
 
@@ -68,16 +65,15 @@ object Dependencies {
         const val Json = "io.ktor:ktor-serialization-kotlinx-json:$version"
         const val Logging = "io.ktor:ktor-client-logging:$version"
         const val Client = "io.ktor:ktor-client-core:$version"
-        const val Logback = "ch.qos.logback:logback-classic:1.2.11"
         const val test = "io.ktor:ktor-server-test-host:$version"
         const val Mock = "io.ktor:ktor-client-mock:$version"
 
     }
 
     object SqlDelight {
-        const val Android = "com.squareup.sqldelight:android-driver:1.5.3"
-        const val Test = "com.squareup.sqldelight:sqlite-driver:1.5.3"
-        const val Coroutines = "com.squareup.sqldelight:coroutines-extensions-jvm:1.5.3"
+        const val Android = "app.cash.sqldelight:android-driver:2.1.0"
+        const val Test = "app.cash.sqldelight:sqlite-driver:2.1.0"
+        const val Coroutines = "app.cash.sqldelight:coroutines-extensions-jvm:2.1.0"
     }
 
     object Serialization {
@@ -105,11 +101,14 @@ object Dependencies {
     }
 
     object ComposeX {
-        private const val version = "1.1.1"
+        // Compose 1.9+ lint rules use modern Kotlin/AGP UAST services.
+        private const val version = "1.9.5"
         const val Ui = "androidx.compose.ui:ui:$version"
         const val Graphics = "androidx.compose.ui:ui-graphics:$version"
         const val Foundation = "androidx.compose.foundation:foundation-layout:$version"
         const val Material = "androidx.compose.material:material:$version"
+        // Material Icons core is no longer transitively bundled with modern Compose Material.
+        const val MaterialIcons = "androidx.compose.material:material-icons-core:1.7.8"
         const val Animation = "androidx.compose.animation:animation:$version"
         const val Tooling = "androidx.compose.ui:ui-tooling:$version"
         const val Test = "androidx.compose.ui:ui-test-junit4:$version"
