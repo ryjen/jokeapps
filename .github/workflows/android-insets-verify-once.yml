@@ -1,0 +1,119 @@
+# Disposable branch-only edge-to-edge verification; delete before any merge.
+name: JokeApps edge-to-edge UI qualification (one-shot)
+on:
+  push:
+    branches: [fix/android-edge-insets-20261015]
+    paths: [.github/workflows/android-insets-verify-once.yml]
+permissions:
+  contents: read
+concurrency:
+  group: jokeapps-insets-20261015
+  cancel-in-progress: false
+jobs:
+  build:
+    name: Unit, lint, APK, and real-activity test compilation
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install Android SDK 36
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;35.0.0"
+      - name: Qualify UI sources and complete app build
+        working-directory: apps/android
+        run: ./gradlew --no-daemon --console=plain test lint :app:compileDebugAndroidTestKotlin :app:assembleDebug :app:assembleRelease --stacktrace
+
+  emulator:
+    name: API ${{ matrix.api }} real-window and safe-area smoke
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        api: [31, 36]
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          test -e /dev/kvm
+      - name: Run old-db and UI tests, launch app, capture actual screenshots
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
+        with:
+          api-level: ${{ matrix.api }}
+          arch: x86_64
+          target: google_apis
+          ram-size: 2048M
+          emulator-boot-timeout: 420
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -no-metrics
+          script: |
+            cd apps/android && ./gradlew --no-daemon --console=plain :app:connectedDebugAndroidTest --stacktrace
+            adb install -r "$(find apps/android/app/build/outputs/apk/debug -name '*.apk' -print -quit)"
+            adb shell pm path com.github.ryjen.jokeapp | grep -q 'package:'
+            adb logcat -c || true
+            adb shell cmd uimode night no
+            adb shell am force-stop com.github.ryjen.jokeapp || true
+            adb shell am start -W -n com.github.ryjen.jokeapp/.MainActivity
+            sleep 3
+            adb shell pidof com.github.ryjen.jokeapp | grep -E '[0-9]+'
+            mkdir -p screenshots
+            adb shell screencap -p /sdcard/jokeapps-light.png
+            adb pull /sdcard/jokeapps-light.png screenshots/api-${{ matrix.api }}-light.png
+            adb shell cmd uimode night yes
+            adb shell am force-stop com.github.ryjen.jokeapp || true
+            adb shell am start -W -n com.github.ryjen.jokeapp/.MainActivity
+            sleep 3
+            adb shell screencap -p /sdcard/jokeapps-dark.png
+            adb pull /sdcard/jokeapps-dark.png screenshots/api-${{ matrix.api }}-dark.png
+            adb shell wm size
+            adb shell settings get secure navigation_mode
+            test -z "$(adb logcat -d -s AndroidRuntime:E | grep 'FATAL EXCEPTION' || true)"
+      - name: Gate real-activity test and baseline suite
+        if: always()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          files = list(Path('apps/android/app/build').rglob('TEST*.xml'))
+          count = failures = errors = skipped = 0
+          cases = []
+          for f in files:
+              root = ET.parse(f).getroot()
+              for s in ([root] if root.tag == 'testsuite' else root.iter('testsuite')):
+                  count += int(s.get('tests',0))
+                  failures += int(s.get('failures',0))
+                  errors += int(s.get('errors',0))
+                  skipped += int(s.get('skipped',0))
+                  cases += [(c.get('classname',''),c.get('name','')) for c in s.iter('testcase')]
+          print(f'API UI gate: {count} tests, {failures} failures, {errors} errors, {skipped} skipped')
+          assert count >= 27 and failures == errors == skipped == 0
+          assert any('MainActivityWindowTest' in cl and 'favoritesTabRemainsVisibleAndNavigableInRealWindow' == n for cl,n in cases), cases
+          assert any('upgradesRealVersionOneDatabaseAndPreservesFavoriteState' == n for _,n in cases)
+          assert any('simultaneousFavoriteWritesCreateExactlyOneRecord' == n for _,n in cases)
+          PY
+      - name: Upload light/dark screenshots for human visual QA
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: jokeapps-api-${{ matrix.api }}-screenshots
+          path: screenshots/*.png
+          if-no-files-found: warn
+          retention-days: 7
