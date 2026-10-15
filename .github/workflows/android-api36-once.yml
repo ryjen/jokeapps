@@ -1,4 +1,4 @@
-# Stage 8: remove server-only Logback servlet integration from Android runtime.
+# Stage 9: validate executed migration testcases, not the JUnit suite name.
 name: JokeApps API36 full qualification (one-shot)
 on:
   push:
@@ -97,7 +97,7 @@ jobs:
           import xml.etree.ElementTree as ET
           files = list(Path('apps/android/app/build').rglob('TEST*.xml'))
           tests = failures = errors = skipped = 0
-          names = []
+          cases = []
           for f in files:
               root = ET.parse(f).getroot()
               for suite in ([root] if root.tag == 'testsuite' else root.iter('testsuite')):
@@ -105,8 +105,13 @@ jobs:
                   failures += int(suite.get('failures',0))
                   errors += int(suite.get('errors',0))
                   skipped += int(suite.get('skipped',0))
-                  names.append(suite.get('name',''))
+                  for case in suite.iter('testcase'):
+                      cases.append((case.get('classname',''), case.get('name','')))
           print(f'instrumented: {tests} tests; {failures} failures; {errors} errors; {skipped} skipped')
           assert tests >= 26 and failures == errors == skipped == 0
-          assert any('JokeMigrationAndUpsertTest' in name for name in names)
+          required = ('upgradesRealVersionOneDatabaseAndPreservesFavoriteState',
+                      'simultaneousFavoriteWritesCreateExactlyOneRecord')
+          for test_name in required:
+              assert any(test_name in method for _, method in cases), (
+                  f'Missing migration or concurrent-upsert test {test_name}; found: {cases}')
           PY
