@@ -1,4 +1,4 @@
-# Stage 9: validate executed migration testcases, not the JUnit suite name.
+# Stage 10: reinstall test-cleaned target APK before authenticated launch smoke.
 name: JokeApps API36 full qualification (one-shot)
 on:
   push:
@@ -83,6 +83,12 @@ jobs:
           script: |
             (cd apps/android && ./gradlew --no-daemon --console=plain :app:connectedDebugAndroidTest --stacktrace) || rc=$?
             if [ -n "${rc:-}" ]; then adb logcat -d -s AndroidRuntime:E TestRunner:E | tail -n 100 || true; exit "$rc"; fi
+            # AGP connectedAndroidTest may uninstall the target package after testing.
+            # Install the exact just-built debug APK before checking real app startup.
+            apk=$(find apps/android/app/build/outputs/apk/debug -name '*.apk' -print -quit)
+            test -n "$apk"
+            adb install -r "$apk"
+            adb shell pm path com.github.ryjen.jokeapp | grep -q 'package:'
             adb logcat -c || true
             adb shell am force-stop com.github.ryjen.jokeapp || true
             adb shell am start -W -n com.github.ryjen.jokeapp/.MainActivity
