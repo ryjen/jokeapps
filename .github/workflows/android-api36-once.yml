@@ -1,4 +1,4 @@
-# Stage 10: reinstall test-cleaned target APK before authenticated launch smoke.
+# Stage 11: avoid shell-local variables in emulator-runner per-line commands.
 name: JokeApps API36 full qualification (one-shot)
 on:
   push:
@@ -81,13 +81,12 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -no-metrics
           script: |
-            (cd apps/android && ./gradlew --no-daemon --console=plain :app:connectedDebugAndroidTest --stacktrace) || rc=$?
-            if [ -n "${rc:-}" ]; then adb logcat -d -s AndroidRuntime:E TestRunner:E | tail -n 100 || true; exit "$rc"; fi
-            # AGP connectedAndroidTest may uninstall the target package after testing.
-            # Install the exact just-built debug APK before checking real app startup.
-            apk=$(find apps/android/app/build/outputs/apk/debug -name '*.apk' -print -quit)
-            test -n "$apk"
-            adb install -r "$apk"
+            # The emulator runner executes each script line in a fresh shell.
+            # Let Gradle fail directly; no shell-local rc variable can mask its exit status.
+            cd apps/android && ./gradlew --no-daemon --console=plain :app:connectedDebugAndroidTest --stacktrace
+            # Instrumentation may uninstall the target app. Resolve the APK in the
+            # same shell invocation that installs it (no cross-line variable state).
+            adb install -r "$(find apps/android/app/build/outputs/apk/debug -name '*.apk' -print -quit)"
             adb shell pm path com.github.ryjen.jokeapp | grep -q 'package:'
             adb logcat -c || true
             adb shell am force-stop com.github.ryjen.jokeapp || true
